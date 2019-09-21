@@ -25,7 +25,8 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
-        "indent": "warn",
+        "react/jsx-indent": ["warn", 2],
+        "indent": ["warn", 4, { "ignoredNodes": ["JSXElement"] }],
         "quotes": "warn",
         "semi": "warn"
     }
