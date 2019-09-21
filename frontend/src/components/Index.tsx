@@ -1,28 +1,40 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import firebase from "firebase/app";
 import "firebase/auth";
 
 const Index: React.FC = () => {
+    const [submitting, setSubmitting] = useState(false);
     const onClickSignIn = useCallback(() => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider).then((credential: firebase.auth.UserCredential) => {
-            if (!credential.user) {
-                throw new Error("no credential user");
-            }
-            credential.user.getIdToken().then((token: string) => {
-                window.console.log(token);
-            }).catch((err: Error) => {
+        setSubmitting(true);
+        (async () => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const credential: firebase.auth.UserCredential = await firebase.auth().signInWithPopup(provider);
+                if (!credential.user) {
+                    throw new Error("no credential user");
+                }
+                const token = await credential.user.getIdToken();
+                const res: Response = await fetch(
+                    "/api/signin", {
+                        method: "POST",
+                        body: JSON.stringify({ token }),
+                    },
+                );
+                const result = await res.json();
+                console.log(result);
+            } catch (err) {
                 window.console.error(err.message);
-            });
-        }).catch((err: Error) => {
-            window.console.error(err.message);
-        });
+            } finally {
+                setSubmitting(false);
+            }
+        })();
     }, []);
     return (
       <div>
         <header className="App-header">
           <button
               className="btn btn-outline-primary"
+              disabled={submitting}
               onClick={onClickSignIn}>Sign in</button>
         </header>
       </div>
