@@ -20,10 +20,13 @@ const Index: React.FC = () => {
                         body: JSON.stringify({ token }),
                     },
                 );
-                const result = await res.json();
-                console.log(result);
+                if (res.ok) {
+                    window.console.log("OK!");
+                } else {
+                    throw new Error(res.statusText);
+                }
             } catch (err) {
-                window.console.error(err.message);
+                alert(err.message);
             } finally {
                 setSubmitting(false);
             }

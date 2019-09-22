@@ -14,9 +14,12 @@ func main() {
 		port = "8080"
 	}
 
-	app := app.NewApp()
+	app, err := app.NewApp()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, app); err != nil {
+	if err := http.ListenAndServe(":"+port, app.Handler()); err != nil {
 		log.Fatal(err)
 	}
 }
