@@ -39,6 +39,7 @@ func NewApp() (*App, error) {
 func (app *App) Handler() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/signin", app.signinHandler).Methods("POST")
+	router.HandleFunc("/api/signout", app.signoutHandler).Methods("POST")
 
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/index", app.indexHandler).Methods("GET")

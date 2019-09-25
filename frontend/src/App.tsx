@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, createStyles, makeStyles } from "@material-ui/core";
+import {
+    AppBar, Toolbar, Typography, Button,
+    makeStyles, createStyles, Theme,
+} from "@material-ui/core";
 
-import Index from "./components/Index";
 import Signin from "./components/Signin";
-import Signout from "./components/Signout";
 
 interface UserInfo {
     displayName: string
@@ -12,27 +13,49 @@ interface UserInfo {
     rawId: string
 }
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
         title: {
-            flexGrow: 1
+            flexGrow: 1,
+        },
+        email: {
+            marginRight: theme.spacing(1),
         },
     });
 });
 
 const App: React.FC = () => {
+    const [email, setEmail] = useState();
     useEffect(() => {
         (async () => {
             try {
                 const res = await fetch("/api/userinfo");
+                if (!res.ok) {
+                    throw new Error(res.statusText);
+                }
                 const user: UserInfo = await res.json();
-                window.console.log(user);
+                setEmail(user.email);
+            } catch (err) {
+                window.console.error(err);
+            }
+        })();
+    }, []);
+    const onClickSignout = useCallback(() => {
+        (async () => {
+            try {
+                const res = await fetch("/api/signout", { method: "POST" });
+                if (res.ok) {
+                    setEmail(null);
+                }
             } catch (err) {
                 window.console.error(err);
             }
         })();
     }, []);
     const classes = useStyles();
+    const button = email
+        ? <Button color="inherit" onClick={onClickSignout}>Sign out</Button>
+        : <Button color="inherit">Sign in</Button>;
     return (
       <div>
         <AppBar position="static">
@@ -40,13 +63,12 @@ const App: React.FC = () => {
             <Typography variant="h6" className={classes.title}>
               Dataset
             </Typography>
-            <Button color="inherit">Login</Button>
+            <Typography className={classes.email}>{email}</Typography>
+            {button}
           </Toolbar>
         </AppBar>
         <BrowserRouter>
-          <Route path="/" exact component={Index}></Route>
-          <Route path="/signin" exact component={Signin}></Route>
-          <Route path="/signout" exact component={Signout}></Route>
+          <Route path="/" exact component={Signin}></Route>
         </BrowserRouter>
       </div>
     );

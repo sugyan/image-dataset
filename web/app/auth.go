@@ -88,3 +88,19 @@ func (app *App) verifyIDToken(ctx context.Context, token string) (*auth.Token, e
 	}
 	return client.VerifyIDToken(ctx, token)
 }
+
+func (app *App) signoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := app.session.Get(r, sessionUser)
+	if err != nil {
+		log.Printf("failed to get session: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	session.Options.MaxAge = -1
+	if err := app.session.Save(r, w, session); err != nil {
+		log.Printf("failed to save session: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

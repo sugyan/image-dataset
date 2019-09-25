@@ -14,7 +14,7 @@ const Index: React.FC = () => {
                 window.console.error(err.message);
             }
         })();
-    });
+    }, []);
     return (
       <div>index</div>
     );

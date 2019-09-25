@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import firebase from "firebase/app";
 import "firebase/auth";
+import { Button } from "@material-ui/core";
 
 const Signin: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
@@ -35,10 +36,10 @@ const Signin: React.FC = () => {
     return (
       <div>
         <header className="App-header">
-          <button
-              className="btn btn-outline-primary"
+          <Button
+              color="primary"
               disabled={submitting}
-              onClick={onClickSignIn}>Sign in</button>
+              onClick={onClickSignIn}>Sign in</Button>
         </header>
       </div>
     );
