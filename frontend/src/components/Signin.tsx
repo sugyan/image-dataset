@@ -1,7 +1,18 @@
 import React, { useCallback, useState } from "react";
+import {
+    Button,
+    Theme, makeStyles, createStyles,
+} from "@material-ui/core";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { Button } from "@material-ui/core";
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        button: {
+            padding: theme.spacing(2),
+        },
+    }),
+);
 
 const Signin: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
@@ -22,7 +33,7 @@ const Signin: React.FC = () => {
                     },
                 );
                 if (res.ok) {
-                    window.console.log("OK!");
+                    window.location.replace("/");
                 } else {
                     throw new Error(res.statusText);
                 }
@@ -33,14 +44,16 @@ const Signin: React.FC = () => {
             }
         })();
     }, []);
+    const classes = useStyles();
     return (
       <div>
-        <header className="App-header">
-          <Button
-              color="primary"
-              disabled={submitting}
-              onClick={onClickSignIn}>Sign in</Button>
-        </header>
+        <Button
+            className={classes.button}
+            color="primary"
+            disabled={submitting}
+            onClick={onClickSignIn}>
+          Sign in
+        </Button>
       </div>
     );
 };

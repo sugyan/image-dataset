@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 import {
-    AppBar, Toolbar, Typography, Button,
-    makeStyles, createStyles, Theme,
+    AppBar, Toolbar, Typography, Container, Button,
+    Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 
 import Signin from "./components/Signin";
+import Menu from "./components/Menu";
+import Images from "./components/Images";
 
 interface UserInfo {
     displayName: string
@@ -55,7 +57,7 @@ const App: React.FC = () => {
     const classes = useStyles();
     const button = email
         ? <Button color="inherit" onClick={onClickSignout}>Sign out</Button>
-        : <Button color="inherit">Sign in</Button>;
+        : null;
     return (
       <div>
         <AppBar position="static">
@@ -67,9 +69,12 @@ const App: React.FC = () => {
             {button}
           </Toolbar>
         </AppBar>
-        <BrowserRouter>
-          <Route path="/" exact component={Signin}></Route>
-        </BrowserRouter>
+        <Container fixed>
+          <BrowserRouter>
+            <Route path="/" exact component={email ? Menu : Signin}></Route>
+            <Route path="/images" exact component={Images}></Route>
+          </BrowserRouter>
+        </Container>
       </div>
     );
 };

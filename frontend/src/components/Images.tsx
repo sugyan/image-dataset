@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const Index: React.FC = () => {
+const Images: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
@@ -20,4 +20,4 @@ const Index: React.FC = () => {
     );
 };
 
-export default Index;
+export default Images;
