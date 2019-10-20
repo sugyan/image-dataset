@@ -64,6 +64,7 @@ class Detector():
         rotated = self._rotate(mirrored, angle)[margin:margin+hypot, margin:margin+hypot, :]
 
         # Calculate the center position and cropping size
+        # https://arxiv.org/pdf/1710.10196v3.pdf
         e0, e1 = self._eye_center(shape)
         m0 = np.array([shape.part(48).x, shape.part(48).y])
         m1 = np.array([shape.part(54).x, shape.part(54).y])
