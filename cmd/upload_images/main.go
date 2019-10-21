@@ -35,8 +35,7 @@ func run(projectID, datadir string) error {
 
 	errCh := make(chan error)
 	wg := sync.WaitGroup{}
-	// for i := 0; i < 20; i++ {
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 20; i++ {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()
@@ -60,7 +59,7 @@ func walk(datadir string) (<-chan string, error) {
 		defer close(pathsCh)
 		i := 0
 		if err := filepath.Walk(datadir, func(path string, info os.FileInfo, err error) error {
-			if i >= 3 {
+			if i >= 30 {
 				return nil
 			}
 			if err != nil {

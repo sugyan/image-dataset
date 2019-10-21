@@ -11,19 +11,24 @@ import (
 	"image/png"
 	"os"
 	"path"
+	"strconv"
 	"strings"
+	"time"
 
+	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	"github.com/sugyan/image-dataset/web/entity"
 )
 
 type gcp struct {
 	csClient   *storage.Client
+	dsClient   *datastore.Client
 	bucketName string
 }
 
 func newGcp(projectID string) (*gcp, error) {
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
+	csClient, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +36,13 @@ func newGcp(projectID string) (*gcp, error) {
 	if os.Getenv("DEVELOPMENT") != "" {
 		bucketName = "staging." + bucketName
 	}
+	dsClient, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
 	return &gcp{
-		csClient:   client,
+		csClient:   csClient,
+		dsClient:   dsClient,
 		bucketName: bucketName,
 	}, nil
 }
@@ -94,5 +104,46 @@ func (g *gcp) writeCS(ctx context.Context, objectName string, image image.Image)
 }
 
 func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
+	postedAt, err := time.Parse("2006-01-02 15:04:05", data.Meta.PostedAt)
+	if err != nil {
+		return err
+	}
+	parts := make([]int, 136)
+	for i := 0; i < 68; i++ {
+		parts[i*2], parts[i*2+1] = data.Parts[i][0], data.Parts[i][1]
+	}
+	metaData := struct {
+		Angle   float32 `json:"angle"`
+		FaceID  int     `json:"face_id"`
+		PhotoID int     `json:"photo_id"`
+		LabelID int     `json:"label_id"`
+	}{
+		Angle: data.Angle,
+	}
+	metaData.FaceID, _ = strconv.Atoi(data.Meta.FaceID)
+	metaData.PhotoID, _ = strconv.Atoi(data.Meta.PhotoID)
+	metaData.LabelID, _ = strconv.Atoi(data.Meta.LabelID)
+	meta, err := json.Marshal(&metaData)
+	if err != nil {
+		return err
+	}
+
+	key := datastore.NameKey(entity.KindNameImage, keyName, nil)
+	image := entity.Image{
+		ImageURL:  fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName),
+		SourceURL: data.Meta.SourceURL,
+		PhotoURL:  data.Meta.PhotoURL,
+		Size:      data.Size,
+		Parts:     parts,
+		LabelName: data.Meta.LabelName,
+		Status:    entity.StatusReady,
+		PostedAt:  postedAt,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Meta:      meta,
+	}
+	if _, err := g.dsClient.Put(ctx, key, &image); err != nil {
+		return err
+	}
 	return nil
 }
