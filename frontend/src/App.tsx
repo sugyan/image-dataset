@@ -32,11 +32,10 @@ const App: React.FC = () => {
         (async () => {
             try {
                 const res = await fetch("/api/userinfo");
-                if (!res.ok) {
-                    throw new Error(res.statusText);
+                if (res.ok) {
+                    const user: UserInfo = await res.json();
+                    setEmail(user.email);
                 }
-                const user: UserInfo = await res.json();
-                setEmail(user.email);
             } catch (err) {
                 window.console.error(err);
             }

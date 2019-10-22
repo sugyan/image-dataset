@@ -14,7 +14,8 @@ func main() {
 		port = "8080"
 	}
 
-	app, err := app.NewApp()
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	app, err := app.NewApp(projectID)
 	if err != nil {
 		log.Fatal(err)
 	}
