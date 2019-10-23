@@ -1,27 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { RouteComponentProps, withRouter } from "react-router";
+import { Link } from "react-router-dom";
 import {
-    GridList, GridListTile,
+    Card, CardActionArea, CardMedia, CardContent,
+    Box, Typography,
     Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 
-type Props = RouteComponentProps<{}>;
+import { ImageResponse } from "../common/interfaces";
 
-interface ImageResponse {
-    image_url: string
-}
+type Props = RouteComponentProps<{}>;
 
 const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
-        root: {
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-around",
-            overflow: "hidden",
-            backgroundColor: theme.palette.background.paper,
+        card: {
+            maxWidth: 148,
         },
-        gridList: {
-            width: "100%",
+        media: {
+            height: 148,
+            width: 148,
         },
     });
 });
@@ -32,7 +29,7 @@ const Images: React.FC<Props> = ({ history }) => {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/index");
+                const res = await fetch("/api/images");
                 if (!res.ok) {
                     if (res.status === 401) {
                         history.push("/");
@@ -44,26 +41,39 @@ const Images: React.FC<Props> = ({ history }) => {
                 const data: ImageResponse[] = await res.json();
                 setImages(data);
             } catch (err) {
-
                 window.console.error(err.message);
             }
         })();
     }, [history]);
-    const tiles = images.map((image: ImageResponse, index: number) => {
+    const cards = images.map((image: ImageResponse) => {
         return (
-          <GridListTile key={index}>
-            <img src={image.image_url} alt="" />
-          </GridListTile>
+          <Box key={image.id} m={0.25}>
+            <Card className={classes.card}>
+              <CardActionArea>
+                <Link to={`/image/${image.id}`}>
+                  <CardMedia
+                      className={classes.media}
+                      image={image.image_url} />
+                </Link>
+                <CardContent>
+                  <Typography variant="body2">
+                    {image.size}×{image.size}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {image.label_name}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Box>
         );
     });
     return (
       <React.Fragment>
         <h2>Images</h2>
-        <div className={classes.root}>
-          <GridList cellHeight={120} className={classes.gridList} cols={10}>
-            {tiles}
-          </GridList>
-        </div>
+        <Box display="flex" flexWrap="wrap">
+          {cards}
+        </Box>
       </React.Fragment>
     );
 };

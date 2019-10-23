@@ -10,14 +10,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func (app *App) indexHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 	results := []*imageResponse{}
 
-	query := datastore.NewQuery(entity.KindNameImage).Limit(100)
+	query := query(r)
 	iter := app.dsClient.Run(r.Context(), query)
 	for {
 		var image entity.Image
-		_, err := iter.Next(&image)
+		key, err := iter.Next(&image)
 		if err != nil {
 			if err == iterator.Done {
 				break
@@ -28,7 +28,10 @@ func (app *App) indexHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		results = append(results, &imageResponse{
-			ImageURL: image.ImageURL,
+			ID:        key.Name,
+			ImageURL:  image.ImageURL,
+			Size:      image.Size,
+			LabelName: image.LabelName,
 		})
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -59,4 +62,13 @@ func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+}
+
+func query(r *http.Request) *datastore.Query {
+	q := r.URL.Query()
+	query := datastore.NewQuery(entity.KindNameImage)
+	if q.Get("key") != "" {
+		query = query.Filter("__key__ >=", datastore.NameKey(entity.KindNameImage, q.Get("key"), nil))
+	}
+	return query.Limit(100)
 }

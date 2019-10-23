@@ -50,7 +50,7 @@ func (app *App) Handler() http.Handler {
 	router.HandleFunc("/api/signout", app.signoutHandler).Methods("POST")
 
 	api := router.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/index", app.indexHandler).Methods("GET")
+	api.HandleFunc("/images", app.imagesHandler).Methods("GET")
 	api.HandleFunc("/userinfo", app.userinfoHandler).Methods("GET")
 	api.Use(app.authMiddleware)
 

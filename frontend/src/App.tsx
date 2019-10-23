@@ -7,6 +7,7 @@ import {
 
 import Signin from "./components/Signin";
 import Menu from "./components/Menu";
+import Image from "./components/Image";
 import Images from "./components/Images";
 
 interface UserInfo {
@@ -71,6 +72,7 @@ const App: React.FC = () => {
         <Container fixed>
           <BrowserRouter>
             <Route path="/" exact component={email ? Menu : Signin}></Route>
+            <Route path="/image/:id" component={Image}></Route>
             <Route path="/images" exact component={Images}></Route>
           </BrowserRouter>
         </Container>
