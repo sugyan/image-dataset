@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Link as RouterLink, LinkProps, Route } from "react-router-dom";
 import {
-    AppBar, Button, Container, Toolbar, Typography,
-    Theme, makeStyles, createStyles
+    AppBar, Button, Container, Link, Toolbar, Typography,
+    Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 
 import Signin from "./components/Signin";
@@ -58,25 +58,26 @@ const App: React.FC = () => {
     const button = email
         ? <Button color="inherit" onClick={onClickSignout}>Sign out</Button>
         : null;
+    const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
+        (props, ref) => <RouterLink innerRef={ref} to="/" {...props} />,
+    );
     return (
-      <div>
+      <BrowserRouter>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              Dataset
+              <Link component={link} color="inherit">Dataset</Link>
             </Typography>
             <Typography className={classes.email}>{email}</Typography>
             {button}
           </Toolbar>
         </AppBar>
         <Container fixed>
-          <BrowserRouter>
-            <Route path="/" exact component={email ? Menu : Signin}></Route>
-            <Route path="/image/:id" component={Image}></Route>
-            <Route path="/images" exact component={Images}></Route>
-          </BrowserRouter>
+          <Route path="/" exact component={email ? Menu : Signin}></Route>
+          <Route path="/image/:id" component={Image}></Route>
+          <Route path="/images" exact component={Images}></Route>
         </Container>
-      </div>
+      </BrowserRouter>
     );
 };
 
