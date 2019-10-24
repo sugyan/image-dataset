@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
+import firebase from "firebase/app";
+import "firebase/auth";
 import {
     Button,
     Theme, makeStyles, createStyles,
 } from "@material-ui/core";
-import firebase from "firebase/app";
-import "firebase/auth";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

@@ -27,23 +27,22 @@ const Images: React.FC<Props> = ({ history }) => {
     const classes = useStyles();
     const [images, setImages] = useState<ImageResponse[]>([]);
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch("/api/images");
-                if (!res.ok) {
-                    if (res.status === 401) {
-                        history.push("/");
-                        return;
-                    } else {
-                        throw new Error(res.statusText);
-                    }
-                }
-                const data: ImageResponse[] = await res.json();
-                setImages(data);
-            } catch (err) {
-                window.console.error(err.message);
+        fetch(
+            "/api/images",
+        ).then((res: Response) => {
+            if (res.ok) {
+                return res.json();
             }
-        })();
+            if (res.status === 401) {
+                history.push("/");
+                return;
+            }
+            throw new Error(res.statusText);
+        }).then((data: ImageResponse[]) => {
+            setImages(data);
+        }).catch((err: Error) => {
+            window.console.error(err.message);
+        });
     }, [history]);
     const cards = images.map((image: ImageResponse) => {
         return (

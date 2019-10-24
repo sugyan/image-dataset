@@ -24,13 +24,12 @@ const ImageViewer: React.FC<Props> = ({ match, history }) => {
         ).then((res: Response) => {
             if (res.ok) {
                 return res.json();
-            } else {
-                if (res.status === 401) {
-                    history.push("/");
-                    return;
-                }
-                throw new Error(res.statusText);
             }
+            if (res.status === 401) {
+                history.push("/");
+                return;
+            }
+            throw new Error(res.statusText);
         }).then((images: ImageResponse[]) => {
             setImages(images);
         }).catch((err: Error) => {
