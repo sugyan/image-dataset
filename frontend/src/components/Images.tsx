@@ -33,7 +33,7 @@ const Images: React.FC<Props> = ({ history }) => {
     useEffect(() => {
         setLoading(true);
         fetch(
-            "/api/images",
+            "/api/search",
         ).then((res: Response) => {
             if (res.ok) {
                 return res.json();

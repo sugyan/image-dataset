@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 const App: React.FC = () => {
+    const classes = useStyles();
     const [email, setEmail] = useState();
     useEffect(() => {
         (async () => {
@@ -54,7 +55,6 @@ const App: React.FC = () => {
             }
         })();
     }, []);
-    const classes = useStyles();
     const button = email
         ? <Button color="inherit" onClick={onClickSignout}>Sign out</Button>
         : null;

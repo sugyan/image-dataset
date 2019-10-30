@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,9 +11,36 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	results := []*imageResponse{}
+const limit = 30
 
+func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
+	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
+	id := r.URL.Query().Get("id")
+	if id != "" {
+		idKey := datastore.NameKey(entity.KindNameImage, id, nil)
+		if r.URL.Query().Get("order") == "desc" {
+			query = query.Filter("__key__ <=", idKey).Order("-__key__")
+		} else {
+			query = query.Filter("__key__ >=", idKey).Order("__key__")
+		}
+	}
+	// fetch forward and backward images
+	images, err := app.fetchImages(r.Context(), query)
+	if err != nil {
+		log.Printf("failed to fetch data: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(&images); err != nil {
+		log.Printf("failed to encode user info: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *App) searchHandler(w http.ResponseWriter, r *http.Request) {
+	results := []*imageResponse{}
 	query := query(r)
 	iter := app.dsClient.Run(r.Context(), query)
 	for {
@@ -31,6 +59,7 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 			ID:        key.Name,
 			ImageURL:  image.ImageURL,
 			Size:      image.Size,
+			Parts:     image.Parts,
 			LabelName: image.LabelName,
 		})
 	}
@@ -64,11 +93,32 @@ func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func query(r *http.Request) *datastore.Query {
-	q := r.URL.Query()
-	query := datastore.NewQuery(entity.KindNameImage)
-	if q.Get("key") != "" {
-		query = query.Filter("__key__ >=", datastore.NameKey(entity.KindNameImage, q.Get("key"), nil))
+func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*imageResponse, error) {
+	images := []*imageResponse{}
+	iter := app.dsClient.Run(ctx, query)
+	for {
+		var image entity.Image
+		key, err := iter.Next(&image)
+		if err != nil {
+			if err == iterator.Done {
+				break
+			} else {
+				return nil, err
+			}
+		}
+		images = append(images, &imageResponse{
+			ID:        key.Name,
+			ImageURL:  image.ImageURL,
+			Size:      image.Size,
+			Parts:     image.Parts,
+			LabelName: image.LabelName,
+		})
 	}
+	return images, nil
+}
+
+func query(r *http.Request) *datastore.Query {
+	query := datastore.NewQuery(entity.KindNameImage)
+	// TODO: search query
 	return query.Limit(100)
 }
