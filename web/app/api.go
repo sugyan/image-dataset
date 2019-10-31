@@ -112,6 +112,10 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 			Size:      image.Size,
 			Parts:     image.Parts,
 			LabelName: image.LabelName,
+			SourceURL: image.SourceURL,
+			PhotoURL:  image.PhotoURL,
+			PostedAt:  image.PostedAt.Unix(),
+			Meta:      string(image.Meta),
 		})
 	}
 	return images, nil

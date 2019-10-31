@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useHistory, useParams } from "react-router";
 import { GlobalHotKeys } from "react-hotkeys";
-import { Box, Grid } from "@material-ui/core";
+import {
+    Box, Grid, Link,
+    Table, TableBody, TableRow, TableCell,
+} from "@material-ui/core";
 
 import { ImageResponse } from "../common/interfaces";
 
@@ -22,6 +25,56 @@ const fetchData = async (params: URLSearchParams, reverse: boolean = false): Pro
     } else {
         return Promise.reject(res.status);
     }
+};
+
+const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
+    const meta = Object.entries(JSON.parse(image.meta)).map((value, index) => {
+        return (
+          <Box key={index}fontFamily="Monospace">{value[0]}: {value[1]}</Box>
+        );
+    });
+    return (
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell component="th" scope="row">ID</TableCell>
+            <TableCell><Box fontSize="h6.fontSize" fontFamily="Monospace">{image.id}</Box></TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Name</TableCell>
+            <TableCell>{image.label_name}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Size</TableCell>
+            <TableCell><Box fontSize="body1.fontSize" fontFamily="Monospace">{image.size}</Box></TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Source URL</TableCell>
+            <TableCell>
+              <Link href={image.source_url} target="_blank" rel="noopener">{image.source_url}</Link>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Posted at</TableCell>
+            <TableCell>
+              {new Date(image.posted_at * 1000).toISOString()}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Photo URL</TableCell>
+            <TableCell>
+              <Link href={image.photo_url} target="_blank" rel="noopener">{image.photo_url}</Link>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Meta</TableCell>
+            <TableCell>
+              {meta}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
 };
 
 const ImageViewer: React.FC = () => {
@@ -135,9 +188,11 @@ const ImageViewer: React.FC = () => {
     return (
       <div>
         <h2>Image</h2>
-        <Box my={1} fontFamily="Monospace">{params.id}</Box>
         <Grid container>
-          <canvas height={512} width={512} ref={canvas} />
+          <Grid item xs={6}>
+            <canvas height={512} width={512} ref={canvas} />
+          </Grid>
+          <Grid>{current && <InfoTable {...current} />}</Grid>
         </Grid>
         <GlobalHotKeys keyMap={keyMap} handlers={handlers} allowChanges={true} />
       </div>
