@@ -24,6 +24,9 @@ type Image struct {
 	SourceURL string
 	PhotoURL  string
 	Size      int
+	Size0256  bool
+	Size0512  bool
+	Size1024  bool
 	Parts     []int
 	LabelName string
 	Status    Status

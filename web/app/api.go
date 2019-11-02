@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"cloud.google.com/go/datastore"
 	"github.com/sugyan/image-dataset/web/entity"
@@ -13,8 +15,26 @@ import (
 
 const limit = 30
 
+var (
+	sizeMap = map[string]string{
+		"256":  "Size0256",
+		"512":  "Size0512",
+		"1024": "Size1024",
+	}
+	sortMap = map[string]string{
+		"id":        "__key__",
+		"posted_at": "PostedAt",
+		"name":      "LabelName",
+	}
+)
+
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
+	query, err := makeQuery(r)
+	if err != nil {
+		log.Printf("failed to make query: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 	id := r.URL.Query().Get("id")
 	if id != "" {
 		idKey := datastore.NameKey(entity.KindNameImage, id, nil)
@@ -33,38 +53,6 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(&images); err != nil {
-		log.Printf("failed to encode user info: %s", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-}
-
-func (app *App) searchHandler(w http.ResponseWriter, r *http.Request) {
-	results := []*imageResponse{}
-	query := query(r)
-	iter := app.dsClient.Run(r.Context(), query)
-	for {
-		var image entity.Image
-		key, err := iter.Next(&image)
-		if err != nil {
-			if err == iterator.Done {
-				break
-			} else {
-				log.Printf("failed to fetch data: %s", err.Error())
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
-			}
-		}
-		results = append(results, &imageResponse{
-			ID:        key.Name,
-			ImageURL:  image.ImageURL,
-			Size:      image.Size,
-			Parts:     image.Parts,
-			LabelName: image.LabelName,
-		})
-	}
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(&results); err != nil {
 		log.Printf("failed to encode user info: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -121,8 +109,31 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 	return images, nil
 }
 
-func query(r *http.Request) *datastore.Query {
-	query := datastore.NewQuery(entity.KindNameImage)
-	// TODO: search query
-	return query.Limit(100)
+func makeQuery(r *http.Request) (*datastore.Query, error) {
+	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
+	if r.URL.Query().Get("size") != "" && r.URL.Query().Get("size") != "all" {
+		if key, ok := sizeMap[r.URL.Query().Get("size")]; ok {
+			query = query.Filter(fmt.Sprintf("%s =", key), true)
+		} else {
+			return nil, fmt.Errorf("invalid size query: %v", r.URL.Query().Get("size"))
+		}
+	}
+	if r.URL.Query().Get("sort") != "" {
+		if key, ok := sortMap[r.URL.Query().Get("sort")]; ok {
+			if r.URL.Query().Get("order") == "desc" {
+				key = "-" + key
+			}
+			query = query.Order(key)
+		} else {
+			return nil, fmt.Errorf("invalid sort query: %v", r.URL.Query().Get("sort"))
+		}
+	}
+	if r.URL.Query().Get("limit") != "" {
+		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+		if err != nil {
+			return nil, err
+		}
+		query = query.Limit(limit)
+	}
+	return query, nil
 }
