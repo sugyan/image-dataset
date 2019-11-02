@@ -39,7 +39,7 @@ const SearchBox: React.FC = () => {
     useEffect(() => {
         const params = new URLSearchParams({ size, sort, order });
         if (`?${params}` !== location.search) {
-            history.replace({
+            history.push({
                 pathname: history.location.pathname,
                 search: params.toString(),
             });
