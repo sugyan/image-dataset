@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { RouteComponentProps, withRouter } from "react-router";
+import { useHistory, useLocation } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import {
     Card, CardActionArea, CardMedia, CardContent,
@@ -7,9 +7,8 @@ import {
     Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 
+import SearchBox from "./SearchBox";
 import { ImageResponse } from "../common/interfaces";
-
-type Props = RouteComponentProps<{}>;
 
 const useStyles = makeStyles((theme: Theme) => {
     return createStyles({
@@ -26,15 +25,20 @@ const useStyles = makeStyles((theme: Theme) => {
     });
 });
 
-const Images: React.FC<Props> = ({ history }) => {
+const Images: React.FC = () => {
     const classes = useStyles();
+    const history = useHistory();
+    const location = useLocation();
     const [images, setImages] = useState<ImageResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     useEffect(() => {
+        if (location.search.length === 0) {
+            return;
+        }
+        const params = new URLSearchParams(location.search);
+        params.set("limit", "100");
         setLoading(true);
-        fetch(
-            "/api/search",
-        ).then((res: Response) => {
+        fetch(`/api/images?${params}`).then((res: Response) => {
             if (res.ok) {
                 return res.json();
             }
@@ -50,7 +54,7 @@ const Images: React.FC<Props> = ({ history }) => {
         }).finally(() => {
             setLoading(false);
         });
-    }, [history]);
+    }, [history, location]);
     const cards = images.map((image: ImageResponse) => {
         const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
             (props, ref) => <RouterLink innerRef={ref} to={`/image/${image.id}`} {...props} />,
@@ -85,12 +89,13 @@ const Images: React.FC<Props> = ({ history }) => {
     return (
       <React.Fragment>
         <h2>Images</h2>
+        <SearchBox />
         {loading && progress}
-        <Box display="flex" flexWrap="wrap">
+        <Box display="flex" flexWrap="wrap" mt={2}>
           {cards}
         </Box>
       </React.Fragment>
     );
 };
 
-export default withRouter(Images);
+export default Images;

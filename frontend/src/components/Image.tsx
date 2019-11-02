@@ -108,7 +108,7 @@ const ImageViewer: React.FC = () => {
         if (!current) {
             return;
         }
-        if (canvas && canvas.current) {
+        if (canvas.current) {
             const ctx = canvas.current.getContext("2d")!;
             const image = new Image();
             image.onload = () => {
