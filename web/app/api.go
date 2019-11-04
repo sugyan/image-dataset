@@ -2,16 +2,56 @@ package app
 
 import (
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"cloud.google.com/go/datastore"
 	"github.com/sugyan/image-dataset/web/entity"
 	"google.golang.org/api/iterator"
 )
+
+type query struct {
+	Filter []struct {
+		Field string
+		Value interface{}
+	}
+	Order struct {
+		Field string
+		Desc  bool
+	}
+}
+
+func init() {
+	gob.Register(&query{})
+}
+
+func newQuery(r *http.Request) (*query, error) {
+	query := &query{}
+	if r.URL.Query().Get("size") != "" && r.URL.Query().Get("size") != "all" {
+		if key, ok := sizeMap[r.URL.Query().Get("size")]; ok {
+			query.Filter = []struct {
+				Field string
+				Value interface{}
+			}{{fmt.Sprintf("%s =", key), true}}
+		} else {
+			return nil, fmt.Errorf("invalid size query: %v", r.URL.Query().Get("size"))
+		}
+	}
+	if r.URL.Query().Get("sort") != "" {
+		if key, ok := sortMap[r.URL.Query().Get("sort")]; ok {
+			query.Order = struct {
+				Field string
+				Desc  bool
+			}{key, r.URL.Query().Get("order") == "desc"}
+		} else {
+			return nil, fmt.Errorf("invalid sort query: %v", r.URL.Query().Get("sort"))
+		}
+	}
+	return query, nil
+}
 
 const limit = 30
 
@@ -24,25 +64,41 @@ var (
 	sortMap = map[string]string{
 		"id":        "__key__",
 		"posted_at": "PostedAt",
-		"name":      "LabelName",
 	}
 )
 
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	query, err := makeQuery(r)
+	query, err := func() (*datastore.Query, error) {
+		id := r.URL.Query().Get("id")
+		if id != "" {
+			session, err := app.session.Get(r, sessionUser)
+			if err != nil {
+				return nil, err
+			}
+			q, ok := session.Values["query"].(*query)
+			if !ok {
+				q = &query{}
+			}
+			return app.makeQuery(q, r.URL.Query().Get("reverse") == "true", datastore.NameKey(entity.KindNameImage, id, nil))
+		}
+		query, err := newQuery(r)
+		if err != nil {
+			return nil, err
+		}
+		session, err := app.session.Get(r, sessionUser)
+		if err != nil {
+			return nil, err
+		}
+		session.Values["query"] = query
+		if err := session.Save(r, w); err != nil {
+			return nil, err
+		}
+		return app.makeQuery(query, false, nil)
+	}()
 	if err != nil {
 		log.Printf("failed to make query: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
-	}
-	id := r.URL.Query().Get("id")
-	if id != "" {
-		idKey := datastore.NameKey(entity.KindNameImage, id, nil)
-		if r.URL.Query().Get("order") == "desc" {
-			query = query.Filter("__key__ <=", idKey).Order("-__key__")
-		} else {
-			query = query.Filter("__key__ >=", idKey).Order("__key__")
-		}
 	}
 	// fetch forward and backward images
 	images, err := app.fetchImages(r.Context(), query)
@@ -109,31 +165,42 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 	return images, nil
 }
 
-func makeQuery(r *http.Request) (*datastore.Query, error) {
+func (app *App) makeQuery(q *query, reverse bool, key *datastore.Key) (*datastore.Query, error) {
 	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
-	if r.URL.Query().Get("size") != "" && r.URL.Query().Get("size") != "all" {
-		if key, ok := sizeMap[r.URL.Query().Get("size")]; ok {
-			query = query.Filter(fmt.Sprintf("%s =", key), true)
-		} else {
-			return nil, fmt.Errorf("invalid size query: %v", r.URL.Query().Get("size"))
+	if q.Filter != nil {
+		for _, filter := range q.Filter {
+			query = query.Filter(filter.Field, filter.Value)
 		}
 	}
-	if r.URL.Query().Get("sort") != "" {
-		if key, ok := sortMap[r.URL.Query().Get("sort")]; ok {
-			if r.URL.Query().Get("order") == "desc" {
-				key = "-" + key
+	if q.Order.Field != "" {
+		field := q.Order.Field
+		if q.Order.Desc {
+			reverse = !reverse
+		}
+		if key != nil {
+			var inequality string
+			if reverse {
+				inequality = "<="
+			} else {
+				inequality = ">="
 			}
-			query = query.Order(key)
-		} else {
-			return nil, fmt.Errorf("invalid sort query: %v", r.URL.Query().Get("sort"))
+			if field != "__key__" {
+				image := &entity.Image{}
+				if err := app.dsClient.Get(context.Background(), key, image); err != nil {
+					return nil, err
+				}
+				switch field {
+				case "PostedAt":
+					query = query.Filter(fmt.Sprintf("%s %s", field, inequality), image.PostedAt)
+				}
+			} else {
+				query = query.Filter(fmt.Sprintf("__key__ %s", inequality), key)
+			}
 		}
-	}
-	if r.URL.Query().Get("limit") != "" {
-		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-		if err != nil {
-			return nil, err
+		if reverse {
+			field = "-" + field
 		}
-		query = query.Limit(limit)
+		query = query.Order(field)
 	}
 	return query, nil
 }

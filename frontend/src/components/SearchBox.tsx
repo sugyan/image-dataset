@@ -80,7 +80,6 @@ const SearchBox: React.FC = () => {
               <RadioGroup aria-label="sort" name="sort" value={sort} onChange={onChangeSort}>
                 <FormControlLabel value="id" control={<Radio />} label="ID" />
                 <FormControlLabel value="posted_at" control={<Radio />} label="Posted At" />
-                <FormControlLabel value="name" control={<Radio />} label="Name" />
               </RadioGroup>
             </FormControl>
             <FormControl component="fieldset" className={classes.formControl}>

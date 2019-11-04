@@ -13,7 +13,7 @@ const bufferThreshold = 20;
 
 const fetchData = async (params: URLSearchParams, reverse: boolean = false): Promise<ImageResponse[]> => {
     if (reverse) {
-        params.set("order", "desc");
+        params.set("reverse", "true");
     }
     const res = await fetch(`/api/images?${params.toString()}`);
     if (res.ok) {

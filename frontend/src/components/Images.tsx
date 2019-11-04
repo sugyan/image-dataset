@@ -36,7 +36,6 @@ const Images: React.FC = () => {
             return;
         }
         const params = new URLSearchParams(location.search);
-        params.set("limit", "100");
         setImages([]);
         setLoading(true);
         fetch(`/api/images?${params}`).then((res: Response) => {
