@@ -13,15 +13,19 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+type queryFilter struct {
+	Str   string
+	Value interface{}
+}
+
+type queryOrder struct {
+	Field string
+	Desc  bool
+}
+
 type query struct {
-	Filter []struct {
-		Field string
-		Value interface{}
-	}
-	Order struct {
-		Field string
-		Desc  bool
-	}
+	Filter []*queryFilter
+	Order  *queryOrder
 }
 
 func init() {
@@ -29,23 +33,29 @@ func init() {
 }
 
 func newQuery(r *http.Request) (*query, error) {
-	query := &query{}
+	query := &query{Filter: []*queryFilter{}}
+	if r.URL.Query().Get("name") != "" {
+		query.Filter = append(query.Filter, &queryFilter{
+			Str:   "LabelName =",
+			Value: r.URL.Query().Get("name"),
+		})
+	}
 	if r.URL.Query().Get("size") != "" && r.URL.Query().Get("size") != "all" {
 		if key, ok := sizeMap[r.URL.Query().Get("size")]; ok {
-			query.Filter = []struct {
-				Field string
-				Value interface{}
-			}{{fmt.Sprintf("%s =", key), true}}
+			query.Filter = append(query.Filter, &queryFilter{
+				Str:   fmt.Sprintf("%s =", key),
+				Value: true,
+			})
 		} else {
 			return nil, fmt.Errorf("invalid size query: %v", r.URL.Query().Get("size"))
 		}
 	}
 	if r.URL.Query().Get("sort") != "" {
 		if key, ok := sortMap[r.URL.Query().Get("sort")]; ok {
-			query.Order = struct {
-				Field string
-				Desc  bool
-			}{key, r.URL.Query().Get("order") == "desc"}
+			query.Order = &queryOrder{
+				Field: key,
+				Desc:  r.URL.Query().Get("order") == "desc",
+			}
 		} else {
 			return nil, fmt.Errorf("invalid sort query: %v", r.URL.Query().Get("sort"))
 		}
@@ -169,10 +179,10 @@ func (app *App) makeQuery(q *query, reverse bool, key *datastore.Key) (*datastor
 	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
 	if q.Filter != nil {
 		for _, filter := range q.Filter {
-			query = query.Filter(filter.Field, filter.Value)
+			query = query.Filter(filter.Str, filter.Value)
 		}
 	}
-	if q.Order.Field != "" {
+	if q.Order != nil {
 		field := q.Order.Field
 		if q.Order.Desc {
 			reverse = !reverse

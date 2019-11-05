@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useHistory, useParams } from "react-router";
+import { Link as RouterLink, LinkProps } from "react-router-dom";
 import { GlobalHotKeys } from "react-hotkeys";
 import {
-    Box, Grid, Link,
+    Box, Grid, Link, Typography, Breadcrumbs,
     Table, TableBody, TableRow, TableCell,
 } from "@material-ui/core";
 
@@ -33,6 +34,18 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
           <Box key={index}fontFamily="Monospace">{value[0]}: {value[1]}</Box>
         );
     });
+    const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
+        (props, ref) => {
+            const params = new URLSearchParams({ name: image.label_name });
+            const to = {
+                pathname: "/images",
+                search: params.toString(),
+            };
+            return (
+              <RouterLink innerRef={ref} to={to} {...props} />
+            );
+        },
+    );
     return (
       <Table>
         <TableBody>
@@ -42,7 +55,9 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">Name</TableCell>
-            <TableCell>{image.label_name}</TableCell>
+            <TableCell>
+              <Link component={link}>{image.label_name}</Link>
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">Size</TableCell>
@@ -187,7 +202,15 @@ const ImageViewer: React.FC = () => {
     }, [history, params.id, images, terminated]);
     return (
       <div>
-        <h2>Image</h2>
+        <Box my={2}>
+          <Breadcrumbs aria-label="breadcrumb">
+            {/* TODO */}
+            <Link color="inherit" href="/" onClick={() => {}}>
+              Images
+            </Link>
+            <Typography color="textPrimary">Image</Typography>
+          </Breadcrumbs>
+        </Box>
         <Grid container>
           <Grid item xs={6}>
             <canvas height={512} width={512} ref={canvas} />
