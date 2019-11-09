@@ -55,9 +55,11 @@ const App: React.FC = () => {
             }
         })();
     }, []);
-    const button = email
-        ? <Button color="inherit" onClick={onClickSignout}>Sign out</Button>
-        : null;
+    const button = email ? (
+      <Button color="inherit" onClick={onClickSignout}>
+        Sign out
+      </Button>
+    ) : null;
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
         (props, ref) => <RouterLink innerRef={ref} to="/" {...props} />,
     );
@@ -66,9 +68,13 @@ const App: React.FC = () => {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              <Link component={link} color="inherit">Dataset</Link>
+              <Link component={link} color="inherit">
+                Dataset
+              </Link>
             </Typography>
-            <Typography className={classes.email}>{email}</Typography>
+            <Typography className={classes.email}>
+              {email}
+            </Typography>
             {button}
           </Toolbar>
         </AppBar>

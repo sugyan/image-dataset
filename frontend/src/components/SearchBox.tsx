@@ -1,11 +1,11 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import {
-    Paper, Box, Collapse,
+    Box, Collapse, MenuItem, Paper,
     List, ListItem, ListItemIcon, ListItemText,
-    FormControl, FormLabel, FormControlLabel,
-    InputLabel, Select, MenuItem, RadioGroup, Radio,
-    makeStyles, createStyles, Theme,
+    FormControl, FormControlLabel, FormLabel, InputLabel,
+    Select, Radio, RadioGroup,
+    Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 import { ExpandMore, ImageSearch, ExpandLess } from "@material-ui/icons";
 
@@ -63,34 +63,74 @@ const SearchBox: React.FC = () => {
         <Collapse in={expand} mountOnEnter unmountOnExit>
           <Box m={3}>
             <FormControl className={classes.formControl}>
-              <InputLabel>Size</InputLabel>
+              <InputLabel>
+                Size
+              </InputLabel>
               <Select value={size} onChange={onChangeSize}>
                 <MenuItem value={"all"}>
-                  <Box fontSize="body1.fontSize" fontFamily="Monospace">-----</Box>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    -----
+                  </Box>
                 </MenuItem>
                 <MenuItem value={"256"}>
-                  <Box fontSize="body1.fontSize" fontFamily="Monospace">&gt;= 256</Box>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    &gt;= 256
+                  </Box>
                 </MenuItem>
                 <MenuItem value={"512"}>
-                  <Box fontSize="body1.fontSize" fontFamily="Monospace">&gt;= 512</Box>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    &gt;= 512
+                  </Box>
                 </MenuItem>
                 <MenuItem value={"1024"}>
-                  <Box fontSize="body1.fontSize" fontFamily="Monospace">&gt;= 1024</Box>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    &gt;= 1024
+                  </Box>
                 </MenuItem>
               </Select>
             </FormControl>
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">Sort by</FormLabel>
-              <RadioGroup aria-label="sort" name="sort" value={sort} onChange={onChangeSort}>
-                <FormControlLabel value="id" control={<Radio />} label="ID" />
-                <FormControlLabel value="posted_at" control={<Radio />} label="Posted At" />
+              <FormLabel component="legend">
+                Order by
+              </FormLabel>
+              <RadioGroup
+                  aria-label="sort"
+                  name="sort"
+                  value={sort}
+                  onChange={onChangeSort}
+              >
+                <FormControlLabel
+                    value="id"
+                    control={<Radio />}
+                    label="ID"
+                />
+                <FormControlLabel
+                    value="posted_at"
+                    control={<Radio />}
+                    label="Posted At"
+                />
               </RadioGroup>
             </FormControl>
-            <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">Order</FormLabel>
-              <RadioGroup aria-label="order" name="order" value={order} onChange={onChangeOrder}>
-                <FormControlLabel value="asc" control={<Radio />} label="Asc" />
-                <FormControlLabel value="desc" control={<Radio />} label="Desc" />
+            <FormControl component="fieldset" className={classes.formControl} >
+              <FormLabel component="legend">
+                &nbsp;
+              </FormLabel>
+              <RadioGroup
+                  aria-label="order"
+                  name="order"
+                  value={order}
+                  onChange={onChangeOrder}
+              >
+                <FormControlLabel
+                    value="asc"
+                    control={<Radio />}
+                    label="Asc"
+                />
+                <FormControlLabel
+                    value="desc"
+                    control={<Radio />}
+                    label="Desc"
+                />
               </RadioGroup>
             </FormControl>
           </Box>

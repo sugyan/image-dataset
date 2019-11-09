@@ -12,7 +12,7 @@ const firebaseConfig = {
     projectId: "idol-face-dataset",
     storageBucket: "idol-face-dataset.appspot.com",
     messagingSenderId: "1007816730072",
-    appId: "1:1007816730072:web:b880d26b1c15d234c57ead"
+    appId: "1:1007816730072:web:b880d26b1c15d234c57ead",
 };
 firebase.initializeApp(firebaseConfig);
 
