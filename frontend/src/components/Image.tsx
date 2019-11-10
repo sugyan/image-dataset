@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useHistory, useParams } from "react-router";
+import { useHistory, useLocation, useParams } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import { GlobalHotKeys } from "react-hotkeys";
 import {
@@ -11,22 +11,6 @@ import { ImageResponse } from "../common/interfaces";
 
 const bufferLength = 100;
 const bufferThreshold = 20;
-
-const fetchData = async (params: URLSearchParams, reverse: boolean = false): Promise<ImageResponse[]> => {
-    if (reverse) {
-        params.set("reverse", "true");
-    }
-    const res = await fetch(`/api/images?${params.toString()}`);
-    if (res.ok) {
-        const images: ImageResponse[] = await res.json();
-        if (reverse) {
-            images.reverse();
-        }
-        return Promise.resolve(images);
-    } else {
-        return Promise.reject(res.status);
-    }
-};
 
 const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
     const meta = Object.entries(JSON.parse(image.meta)).map((value, index) => {
@@ -94,6 +78,7 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
 
 const ImageViewer: React.FC = () => {
     const history = useHistory();
+    const location = useLocation();
     const params = useParams<{ id: string }>();
     const [images, setImages] = useState<ImageResponse[]>([]);
     const [terminated, setTerminated] = useState<[boolean, boolean]>([false, false]);
@@ -104,13 +89,19 @@ const ImageViewer: React.FC = () => {
     const nextImage = () => {
         const index = images.findIndex((element: ImageResponse) => element.id === params.id);
         if (index + 1 < images.length) {
-            history.push(`/image/${images[index + 1].id}`);
+            history.replace({
+                pathname: `/image/${images[index + 1].id}`,
+                search: location.search,
+            });
         }
     };
     const prevImage = () => {
         const index = images.findIndex((element: ImageResponse) => element.id === params.id);
         if (index - 1 >= 0) {
-            history.push(`/image/${images[index - 1].id}`);
+            history.replace({
+                pathname: `/image/${images[index - 1].id}`,
+                search: location.search,
+            });
         }
     };
     const handlers = {
@@ -144,6 +135,24 @@ const ImageViewer: React.FC = () => {
         }
     }, [current]);
     useEffect(() => {
+        const fetchData = async (id: string, reverse: boolean = false): Promise<ImageResponse[]> => {
+            const params: URLSearchParams = new URLSearchParams(location.search);
+            params.set("id", id);
+            if (reverse) {
+                params.set("reverse", "true");
+            }
+            const res = await fetch(`/api/images?${params.toString()}`);
+            if (res.ok) {
+                const images: ImageResponse[] = await res.json();
+                if (reverse) {
+                    images.reverse();
+                }
+                return Promise.resolve(images);
+            } else {
+                return Promise.reject(res.status);
+            }
+        };
+
         const requests: [Promise<ImageResponse[]>, Promise<ImageResponse[]>] = [
             Promise.resolve([]),
             Promise.resolve([]),
@@ -151,18 +160,14 @@ const ImageViewer: React.FC = () => {
         if (images.length > 0) {
             const index = images.findIndex((element: ImageResponse) => element.id === params.id);
             if (index < bufferThreshold && !terminated[0]) {
-                const params: URLSearchParams = new URLSearchParams({ id: images[0].id });
-                requests[0] = fetchData(params, true);
+                requests[0] = fetchData(images[0].id, true);
             }
             if (images.length - index <= bufferThreshold && !terminated[1]) {
-                const params: URLSearchParams = new URLSearchParams({ id: images[images.length - 1].id });
-                requests[1] = fetchData(params);
+                requests[1] = fetchData(images[images.length - 1].id, false);
             }
         } else {
-            const fwParams: URLSearchParams = new URLSearchParams({ id: params.id });
-            const bwParams: URLSearchParams = new URLSearchParams({ id: params.id });
-            requests[0] = fetchData(bwParams, true);
-            requests[1] = fetchData(fwParams);
+            requests[0] = fetchData(params.id, true);
+            requests[1] = fetchData(params.id, false);
         }
         Promise.all(requests).then((results: ImageResponse[][]) => {
             if (results[0].length > 0 || results[1].length > 0) {
@@ -199,13 +204,23 @@ const ImageViewer: React.FC = () => {
                 window.console.error(err);
             }
         });
-    }, [history, params.id, images, terminated]);
+    }, [location, history, params.id, images, terminated]);
+    const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
+        (props, ref) => {
+            const to = {
+                pathname: "/images",
+                search: location.search,
+            };
+            return (
+              <RouterLink innerRef={ref} to={to} {...props} />
+            );
+        },
+    );
     return (
       <div>
         <Box my={2}>
           <Breadcrumbs aria-label="breadcrumb">
-            {/* TODO */}
-            <Link color="inherit" href="/" onClick={() => {}}>
+            <Link color="inherit" component={link}>
               Images
             </Link>
             <Typography color="textPrimary">Image</Typography>

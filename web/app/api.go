@@ -79,29 +79,14 @@ var (
 
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 	query, err := func() (*datastore.Query, error) {
-		id := r.URL.Query().Get("id")
-		if id != "" {
-			session, err := app.session.Get(r, sessionUser)
-			if err != nil {
-				return nil, err
-			}
-			q, ok := session.Values["query"].(*query)
-			if !ok {
-				q = &query{}
-			}
-			return app.makeQuery(q, r.URL.Query().Get("reverse") == "true", datastore.NameKey(entity.KindNameImage, id, nil))
-		}
 		query, err := newQuery(r)
 		if err != nil {
 			return nil, err
 		}
-		session, err := app.session.Get(r, sessionUser)
-		if err != nil {
-			return nil, err
-		}
-		session.Values["query"] = query
-		if err := session.Save(r, w); err != nil {
-			return nil, err
+		id := r.URL.Query().Get("id")
+		if id != "" {
+			key := datastore.NameKey(entity.KindNameImage, id, nil)
+			return app.makeQuery(query, r.URL.Query().Get("reverse") == "true", key)
 		}
 		return app.makeQuery(query, false, nil)
 	}()

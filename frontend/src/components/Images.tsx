@@ -57,7 +57,15 @@ const Images: React.FC = () => {
     }, [history, location]);
     const cards = images.map((image: ImageResponse) => {
         const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
-            (props, ref) => <RouterLink innerRef={ref} to={`/image/${image.id}`} {...props} />,
+            (props, ref) => {
+                const to = {
+                    pathname: `/image/${image.id}`,
+                    search: location.search,
+                };
+                return (
+                  <RouterLink innerRef={ref} to={to} {...props} />
+                );
+            },
         );
         return (
           <Box key={image.id} m={0.25}>

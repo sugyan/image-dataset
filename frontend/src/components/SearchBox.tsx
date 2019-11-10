@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import {
-    Box, Collapse, MenuItem, Paper,
+    Box, Button, Collapse, MenuItem, Paper,
     List, ListItem, ListItemIcon, ListItemText,
     FormControl, FormControlLabel, FormLabel, InputLabel,
     Select, Radio, RadioGroup,
@@ -36,6 +36,11 @@ const SearchBox: React.FC = () => {
     const onChangeOrder = (event: ChangeEvent<HTMLInputElement>) => {
         setOrder(event.target.value);
     };
+    const resetForm = () => {
+        setSize("all");
+        setSort("id");
+        setOrder("asc");
+    };
     useEffect(() => {
         const params = new URLSearchParams({ size, sort, order });
         const name = new URLSearchParams(location.search).get("name");
@@ -43,7 +48,7 @@ const SearchBox: React.FC = () => {
             params.set("name", name);
         }
         if (`?${params}` !== location.search) {
-            history.push({
+            history.replace({
                 pathname: history.location.pathname,
                 search: params.toString(),
             });
@@ -111,7 +116,7 @@ const SearchBox: React.FC = () => {
                 />
               </RadioGroup>
             </FormControl>
-            <FormControl component="fieldset" className={classes.formControl} >
+            <FormControl component="fieldset" className={classes.formControl}>
               <FormLabel component="legend">
                 &nbsp;
               </FormLabel>
@@ -132,6 +137,12 @@ const SearchBox: React.FC = () => {
                     label="Desc"
                 />
               </RadioGroup>
+            </FormControl>
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">
+                &nbsp;
+              </FormLabel>
+              <Button color="primary" onClick={() => resetForm()}>Reset</Button>
             </FormControl>
           </Box>
         </Collapse>
