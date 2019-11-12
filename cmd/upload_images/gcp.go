@@ -104,7 +104,7 @@ func (g *gcp) writeCS(ctx context.Context, objectName string, image image.Image)
 }
 
 func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
-	postedAt, err := time.Parse("2006-01-02 15:04:05", data.Meta.PostedAt)
+	publishedAt, err := time.Parse("2006-01-02 15:04:05", data.Meta.PublishedAt)
 	if err != nil {
 		return err
 	}
@@ -130,20 +130,20 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 
 	key := datastore.NameKey(entity.KindNameImage, keyName, nil)
 	image := entity.Image{
-		ImageURL:  fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName),
-		SourceURL: data.Meta.SourceURL,
-		PhotoURL:  data.Meta.PhotoURL,
-		Size:      data.Size,
-		Size0256:  data.Size >= 256,
-		Size0512:  data.Size >= 512,
-		Size1024:  data.Size >= 1024,
-		Parts:     parts,
-		LabelName: data.Meta.LabelName,
-		Status:    entity.StatusReady,
-		PostedAt:  postedAt,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Meta:      meta,
+		ImageURL:    fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName),
+		SourceURL:   data.Meta.SourceURL,
+		PhotoURL:    data.Meta.PhotoURL,
+		Size:        data.Size,
+		Size0256:    data.Size >= 256,
+		Size0512:    data.Size >= 512,
+		Size1024:    data.Size >= 1024,
+		Parts:       parts,
+		LabelName:   data.Meta.LabelName,
+		Status:      entity.StatusReady,
+		PublishedAt: publishedAt,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Meta:        meta,
 	}
 	if _, err := g.dsClient.Put(ctx, key, &image); err != nil {
 		return err

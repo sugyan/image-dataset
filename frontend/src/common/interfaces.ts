@@ -6,6 +6,6 @@ export interface ImageResponse {
     label_name: string
     source_url: string
     photo_url: string
-    posted_at: number
+    published_at: number
     meta: string
 }

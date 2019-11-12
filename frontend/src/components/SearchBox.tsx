@@ -1,10 +1,10 @@
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, ChangeEvent, useEffect, useRef } from "react";
 import { useHistory, useLocation } from "react-router";
 import {
     Box, Button, Collapse, MenuItem, Paper,
     List, ListItem, ListItemIcon, ListItemText,
     FormControl, FormControlLabel, FormLabel, InputLabel,
-    Select, Radio, RadioGroup,
+    Select, TextField, Radio, RadioGroup,
     Theme, makeStyles, createStyles,
 } from "@material-ui/core";
 import { ExpandMore, ImageSearch, ExpandLess } from "@material-ui/icons";
@@ -22,11 +22,32 @@ const SearchBox: React.FC = () => {
     const classes = useStyles();
     const history = useHistory();
     const location = useLocation();
+    const nameValue = useRef<string>();
     const params = new URLSearchParams(location.search);
+    const [name, setName] = useState<string>(params.get("name") || "");
+    const [status, setStatus] = useState<string>(params.get("status") || "all");
     const [size, setSize] = useState<string>(params.get("size") || "all");
     const [sort, setSort] = useState<string>(params.get("sort") || "id");
     const [order, setOrder] = useState<string>(params.get("order") || "asc");
     const [expand, setExpand] = useState<boolean>(false);
+    const onChangeName = (e: ChangeEvent<{ name?: string, value: any }>) => {
+        setName(e.target.value);
+        const value = e.target.value;
+        nameValue.current = value;
+        setTimeout(() => {
+            if (nameValue.current === value) {
+                const params = new URLSearchParams(location.search);
+                params.set("name", value);
+                history.replace({
+                    pathname: history.location.pathname,
+                    search: params.toString(),
+                });
+            }
+        }, 500);
+    };
+    const onChangeStatus = (e: ChangeEvent<{ name?: string, value: any }>) => {
+        setStatus(e.target.value);
+    };
     const onChangeSize = (e: ChangeEvent<{ name?: string; value: any }>) => {
         setSize(e.target.value);
     };
@@ -42,7 +63,7 @@ const SearchBox: React.FC = () => {
         setOrder("asc");
     };
     useEffect(() => {
-        const params = new URLSearchParams({ size, sort, order });
+        const params = new URLSearchParams({ status, size, sort, order });
         const name = new URLSearchParams(location.search).get("name");
         if (name) {
             params.set("name", name);
@@ -53,7 +74,7 @@ const SearchBox: React.FC = () => {
                 search: params.toString(),
             });
         }
-    }, [size, sort, order, history, location]);
+    }, [status, size, sort, order, history, location]);
     return (
       <Paper square={true}>
         <List>
@@ -67,6 +88,45 @@ const SearchBox: React.FC = () => {
         </List>
         <Collapse in={expand} mountOnEnter unmountOnExit>
           <Box m={3}>
+            <FormControl className={classes.formControl}>
+              <TextField
+                  label="Name"
+                  InputLabelProps={{ shrink: true }}
+                  value={name}
+                  onChange={onChangeName} />
+            </FormControl>
+            <FormControl className={classes.formControl}>
+              <InputLabel>
+                Status
+              </InputLabel>
+              <Select value={status} onChange={onChangeStatus}>
+                <MenuItem value={"all"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    -----
+                  </Box>
+                </MenuItem>
+                <MenuItem value={"0"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    = Ready
+                  </Box>
+                </MenuItem>
+                <MenuItem value={"1"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    = NG
+                  </Box>
+                </MenuItem>
+                <MenuItem value={"2"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    = Pending
+                  </Box>
+                </MenuItem>
+                <MenuItem value={"3"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    = OK
+                  </Box>
+                </MenuItem>
+              </Select>
+            </FormControl>
             <FormControl className={classes.formControl}>
               <InputLabel>
                 Size
@@ -110,9 +170,14 @@ const SearchBox: React.FC = () => {
                     label="ID"
                 />
                 <FormControlLabel
-                    value="posted_at"
+                    value="updated_at"
                     control={<Radio />}
-                    label="Posted At"
+                    label="Updated At"
+                />
+                <FormControlLabel
+                    value="published_at"
+                    control={<Radio />}
+                    label="Published At"
                 />
               </RadioGroup>
             </FormControl>

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"cloud.google.com/go/datastore"
 	"github.com/sugyan/image-dataset/web/entity"
@@ -34,30 +35,42 @@ func init() {
 
 func newQuery(r *http.Request) (*query, error) {
 	query := &query{Filter: []*queryFilter{}}
-	if r.URL.Query().Get("name") != "" {
+
+	values := r.URL.Query()
+	if values.Get("name") != "" {
 		query.Filter = append(query.Filter, &queryFilter{
 			Str:   "LabelName =",
-			Value: r.URL.Query().Get("name"),
+			Value: values.Get("name"),
 		})
 	}
-	if r.URL.Query().Get("size") != "" && r.URL.Query().Get("size") != "all" {
-		if key, ok := sizeMap[r.URL.Query().Get("size")]; ok {
+	if values.Get("status") != "" && values.Get("status") != "all" {
+		status, err := strconv.Atoi(values.Get("status"))
+		if err != nil {
+			return nil, err
+		}
+		query.Filter = append(query.Filter, &queryFilter{
+			Str:   "Status =",
+			Value: status,
+		})
+	}
+	if values.Get("size") != "" && values.Get("size") != "all" {
+		if key, ok := sizeMap[values.Get("size")]; ok {
 			query.Filter = append(query.Filter, &queryFilter{
 				Str:   fmt.Sprintf("%s =", key),
 				Value: true,
 			})
 		} else {
-			return nil, fmt.Errorf("invalid size query: %v", r.URL.Query().Get("size"))
+			return nil, fmt.Errorf("invalid size query: %v", values.Get("size"))
 		}
 	}
-	if r.URL.Query().Get("sort") != "" {
-		if key, ok := sortMap[r.URL.Query().Get("sort")]; ok {
+	if values.Get("sort") != "" {
+		if key, ok := sortMap[values.Get("sort")]; ok {
 			query.Order = &queryOrder{
 				Field: key,
-				Desc:  r.URL.Query().Get("order") == "desc",
+				Desc:  values.Get("order") == "desc",
 			}
 		} else {
-			return nil, fmt.Errorf("invalid sort query: %v", r.URL.Query().Get("sort"))
+			return nil, fmt.Errorf("invalid sort query: %v", values.Get("sort"))
 		}
 	}
 	return query, nil
@@ -72,8 +85,9 @@ var (
 		"1024": "Size1024",
 	}
 	sortMap = map[string]string{
-		"id":        "__key__",
-		"posted_at": "PostedAt",
+		"id":           "__key__",
+		"updated_at":   "UpdatedAt",
+		"published_at": "PublishedAt",
 	}
 )
 
@@ -146,15 +160,15 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 			}
 		}
 		images = append(images, &imageResponse{
-			ID:        key.Name,
-			ImageURL:  image.ImageURL,
-			Size:      image.Size,
-			Parts:     image.Parts,
-			LabelName: image.LabelName,
-			SourceURL: image.SourceURL,
-			PhotoURL:  image.PhotoURL,
-			PostedAt:  image.PostedAt.Unix(),
-			Meta:      string(image.Meta),
+			ID:          key.Name,
+			ImageURL:    image.ImageURL,
+			Size:        image.Size,
+			Parts:       image.Parts,
+			LabelName:   image.LabelName,
+			SourceURL:   image.SourceURL,
+			PhotoURL:    image.PhotoURL,
+			PublishedAt: image.PublishedAt.Unix(),
+			Meta:        string(image.Meta),
 		})
 	}
 	return images, nil
@@ -185,8 +199,8 @@ func (app *App) makeQuery(q *query, reverse bool, key *datastore.Key) (*datastor
 					return nil, err
 				}
 				switch field {
-				case "PostedAt":
-					query = query.Filter(fmt.Sprintf("%s %s", field, inequality), image.PostedAt)
+				case "PublishedAt":
+					query = query.Filter(fmt.Sprintf("%s %s", field, inequality), image.PublishedAt)
 				}
 			} else {
 				query = query.Filter(fmt.Sprintf("__key__ %s", inequality), key)
