@@ -3,9 +3,10 @@ import { useHistory, useLocation, useParams } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import { GlobalHotKeys } from "react-hotkeys";
 import {
-    Box, Grid, Link, Typography, Breadcrumbs,
+    Box, Button, ButtonGroup, Grid, Link, Typography, Breadcrumbs,
     Table, TableBody, TableRow, TableCell,
 } from "@material-ui/core";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
 
 import { ImageResponse } from "../common/interfaces";
 
@@ -48,21 +49,21 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
             <TableCell><Box fontSize="body1.fontSize" fontFamily="Monospace">{image.size}</Box></TableCell>
           </TableRow>
           <TableRow>
+            <TableCell component="th" scope="row">Photo URL</TableCell>
+            <TableCell>
+              <Link href={image.photo_url} target="_blank" rel="noopener">{image.photo_url}</Link>
+            </TableCell>
+          </TableRow>
+          <TableRow>
             <TableCell component="th" scope="row">Source URL</TableCell>
             <TableCell>
               <Link href={image.source_url} target="_blank" rel="noopener">{image.source_url}</Link>
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell component="th" scope="row">Posted at</TableCell>
+            <TableCell component="th" scope="row">Published</TableCell>
             <TableCell>
-              {new Date(image.posted_at * 1000).toISOString()}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell component="th" scope="row">Photo URL</TableCell>
-            <TableCell>
-              <Link href={image.photo_url} target="_blank" rel="noopener">{image.photo_url}</Link>
+              {new Date(image.published_at * 1000).toISOString()}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -108,6 +109,11 @@ const ImageViewer: React.FC = () => {
         NEXT_IMAGE: nextImage,
         PREV_IMAGE: prevImage,
     };
+    const updateStatus = (status: number) => {
+        // TODO
+        console.log(status);
+    };
+
     const current = images.find((element: ImageResponse) => element.id === params.id);
     const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
@@ -228,7 +234,30 @@ const ImageViewer: React.FC = () => {
         </Box>
         <Grid container>
           <Grid item xs={6}>
-            <canvas height={512} width={512} ref={canvas} />
+            <Grid container justify="center">
+              <Box width={512}>
+                <canvas height={512} width={512} ref={canvas} />
+              </Box>
+            </Grid>
+            <Grid container justify="space-between">
+              <Box>
+                <Button onClick={() => prevImage()}>
+                  <ArrowBack />
+                </Button>
+              </Box>
+              <Box>
+                <ButtonGroup color="primary">
+                  <Button onClick={() => updateStatus(1)}>NG</Button>
+                  <Button onClick={() => updateStatus(2)}>Pending</Button>
+                  <Button onClick={() => updateStatus(3)}>OK</Button>
+                </ButtonGroup>
+              </Box>
+              <Box>
+                <Button onClick={() => nextImage()}>
+                  <ArrowForward />
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
           <Grid>{current && <InfoTable {...current} />}</Grid>
         </Grid>
