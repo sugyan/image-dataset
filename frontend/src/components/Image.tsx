@@ -61,9 +61,15 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell component="th" scope="row">Published</TableCell>
+            <TableCell component="th" scope="row">Published at</TableCell>
             <TableCell>
               {new Date(image.published_at * 1000).toISOString()}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">Updated at</TableCell>
+            <TableCell>
+              {new Date(image.updated_at * 1000).toISOString()}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -77,6 +83,34 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
     );
 };
 
+const Canvas: React.FC<{ size: number, image: ImageResponse | undefined }> = ({ size, image }) => {
+    const canvas = useRef<HTMLCanvasElement>(null);
+    if (image && canvas.current) {
+        const ctx = canvas.current.getContext("2d")!;
+        const img = new Image();
+        img.onload = () => {
+            const scale = image.size / 512;
+            ctx.drawImage(img, 0, 0, 512, 512);
+            ctx.strokeStyle = "cyan";
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 68; i++) {
+                let [x, y] = [image.parts[i * 2], image.parts[i * 2 + 1]];
+                x /= scale;
+                y /= scale;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+        };
+        img.src = image.image_url;
+    }
+    return (
+      <Box width={size}>
+        <canvas height={size} width={size} ref={canvas} />
+      </Box>
+    );
+};
+
 const ImageViewer: React.FC = () => {
     const history = useHistory();
     const location = useLocation();
@@ -86,6 +120,9 @@ const ImageViewer: React.FC = () => {
     const keyMap = {
         NEXT_IMAGE: ["ctrl+f", "right"],
         PREV_IMAGE: ["ctrl+b", "left"],
+        STATUS_1: ["1"],
+        STATUS_2: ["2"],
+        STATUS_3: ["3"],
     };
     const nextImage = () => {
         const index = images.findIndex((element: ImageResponse) => element.id === params.id);
@@ -108,6 +145,9 @@ const ImageViewer: React.FC = () => {
     const handlers = {
         NEXT_IMAGE: nextImage,
         PREV_IMAGE: prevImage,
+        STATUS_1: () => updateStatus(1),
+        STATUS_2: () => updateStatus(2),
+        STATUS_3: () => updateStatus(3),
     };
     const updateStatus = (status: number) => {
         // TODO
@@ -115,31 +155,6 @@ const ImageViewer: React.FC = () => {
     };
 
     const current = images.find((element: ImageResponse) => element.id === params.id);
-    const canvas = useRef<HTMLCanvasElement>(null);
-    useEffect(() => {
-        if (!current) {
-            return;
-        }
-        if (canvas.current) {
-            const ctx = canvas.current.getContext("2d")!;
-            const image = new Image();
-            image.onload = () => {
-                const scale = current.size / 512;
-                ctx.drawImage(image, 0, 0, 512, 512);
-                ctx.strokeStyle = "cyan";
-                ctx.lineWidth = 2;
-                for (let i = 0; i < 68; i++) {
-                    let [x, y] = [current.parts[i * 2], current.parts[i * 2 + 1]];
-                    x /= scale;
-                    y /= scale;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 3, 0, 2 * Math.PI);
-                    ctx.stroke();
-                }
-            };
-            image.src = current.image_url;
-        }
-    }, [current]);
     useEffect(() => {
         const fetchData = async (id: string, reverse: boolean = false): Promise<ImageResponse[]> => {
             const params: URLSearchParams = new URLSearchParams(location.search);
@@ -235,9 +250,7 @@ const ImageViewer: React.FC = () => {
         <Grid container>
           <Grid item xs={6}>
             <Grid container justify="center">
-              <Box width={512}>
-                <canvas height={512} width={512} ref={canvas} />
-              </Box>
+              <Canvas size={512} image={current} />
             </Grid>
             <Grid container justify="space-between">
               <Box>

@@ -7,5 +7,6 @@ export interface ImageResponse {
     source_url: string
     photo_url: string
     published_at: number
+    updated_at: number
     meta: string
 }

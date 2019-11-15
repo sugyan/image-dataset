@@ -168,6 +168,7 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 			SourceURL:   image.SourceURL,
 			PhotoURL:    image.PhotoURL,
 			PublishedAt: image.PublishedAt.Unix(),
+			UpdatedAt:   image.UpdatedAt.Unix(),
 			Meta:        string(image.Meta),
 		})
 	}
