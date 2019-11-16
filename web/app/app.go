@@ -3,8 +3,11 @@ package app
 import (
 	"context"
 	"encoding/hex"
+	"html/template"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"cloud.google.com/go/datastore"
 	firebase "firebase.google.com/go"
@@ -54,5 +57,24 @@ func (app *App) Handler() http.Handler {
 	api.HandleFunc("/userinfo", app.userinfoHandler).Methods("GET")
 	api.Use(app.authMiddleware)
 
+	// wildcard endpoints
+	router.PathPrefix("/").HandlerFunc(app.appHandler)
+
 	return router
+}
+
+func (app *App) appHandler(w http.ResponseWriter, r *http.Request) {
+	if err := renderTemplate(w, "index.html"); err != nil {
+		log.Printf("failed to render template: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+}
+
+func renderTemplate(w http.ResponseWriter, filename string) error {
+	t, err := template.ParseFiles(filepath.Join("templates", filename))
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "text/html")
+	return t.Execute(w, nil)
 }

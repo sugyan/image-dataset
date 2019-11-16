@@ -1,0 +1,16 @@
+runtime: go113
+
+handlers:
+- url: /favicon\.ico
+  static_files: static/img/favicon.ico
+  upload: static/img/favicon\.ico
+- url: /static
+  static_dir: static
+- url: /.*
+  script: auto
+
+includes:
+- env.yaml
+
+automatic_scaling:
+  max_idle_instances: 1
