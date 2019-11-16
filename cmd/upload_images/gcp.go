@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -129,22 +130,30 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 	}
 
 	key := datastore.NameKey(entity.KindNameImage, keyName, nil)
-	image := entity.Image{
-		ImageURL:    fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName),
-		SourceURL:   data.Meta.SourceURL,
-		PhotoURL:    data.Meta.PhotoURL,
-		Size:        data.Size,
-		Size0256:    data.Size >= 256,
-		Size0512:    data.Size >= 512,
-		Size1024:    data.Size >= 1024,
-		Parts:       parts,
-		LabelName:   data.Meta.LabelName,
-		Status:      entity.StatusReady,
-		PublishedAt: publishedAt,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		Meta:        meta,
+	var image entity.Image
+	if err := g.dsClient.Get(ctx, key, &image); err != nil {
+		if errors.Is(err, datastore.ErrNoSuchEntity) {
+			// create new entity if entity does not exist
+			image = entity.Image{
+				Status:    entity.StatusReady,
+				CreatedAt: time.Now(),
+			}
+		} else {
+			return err
+		}
 	}
+	image.ImageURL = fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName)
+	image.SourceURL = data.Meta.SourceURL
+	image.PhotoURL = data.Meta.PhotoURL
+	image.Size = data.Size
+	image.Size0256 = data.Size >= 256
+	image.Size0512 = data.Size >= 512
+	image.Size1024 = data.Size >= 1024
+	image.Parts = parts
+	image.LabelName = data.Meta.LabelName
+	image.PublishedAt = publishedAt
+	image.UpdatedAt = time.Now()
+	image.Meta = meta
 	if _, err := g.dsClient.Put(ctx, key, &image); err != nil {
 		return err
 	}
