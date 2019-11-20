@@ -2,21 +2,22 @@ package app
 
 import (
 	"context"
-	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
-	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/firestore"
 	"github.com/sugyan/image-dataset/web/entity"
 	"google.golang.org/api/iterator"
 )
 
 type queryFilter struct {
-	Str   string
-	Value interface{}
+	path  string
+	op    string
+	value interface{}
 }
 
 type queryOrder struct {
@@ -29,18 +30,15 @@ type query struct {
 	Order  *queryOrder
 }
 
-func init() {
-	gob.Register(&query{})
-}
-
 func newQuery(r *http.Request) (*query, error) {
 	query := &query{Filter: []*queryFilter{}}
 
 	values := r.URL.Query()
 	if values.Get("name") != "" {
 		query.Filter = append(query.Filter, &queryFilter{
-			Str:   "LabelName =",
-			Value: values.Get("name"),
+			path:  "LabelName",
+			op:    "==",
+			value: values.Get("name"),
 		})
 	}
 	if values.Get("status") != "" && values.Get("status") != "all" {
@@ -49,15 +47,17 @@ func newQuery(r *http.Request) (*query, error) {
 			return nil, err
 		}
 		query.Filter = append(query.Filter, &queryFilter{
-			Str:   "Status =",
-			Value: status,
+			path:  "Status",
+			op:    "==",
+			value: status,
 		})
 	}
 	if values.Get("size") != "" && values.Get("size") != "all" {
 		if key, ok := sizeMap[values.Get("size")]; ok {
 			query.Filter = append(query.Filter, &queryFilter{
-				Str:   fmt.Sprintf("%s =", key),
-				Value: true,
+				path:  key,
+				op:    "==",
+				value: true,
 			})
 		} else {
 			return nil, fmt.Errorf("invalid size query: %v", values.Get("size"))
@@ -85,24 +85,23 @@ var (
 		"1024": "Size1024",
 	}
 	sortMap = map[string]string{
-		"id":           "__key__",
+		"id":           "ID",
 		"updated_at":   "UpdatedAt",
 		"published_at": "PublishedAt",
 	}
 )
 
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	query, err := func() (*datastore.Query, error) {
+	query, err := func() (*firestore.Query, error) {
 		query, err := newQuery(r)
 		if err != nil {
 			return nil, err
 		}
-		id := r.URL.Query().Get("id")
-		if id != "" {
-			key := datastore.NameKey(entity.KindNameImage, id, nil)
-			return app.makeQuery(query, r.URL.Query().Get("reverse") == "true", key)
-		}
-		return app.makeQuery(query, false, nil)
+		return app.makeQuery(
+			query,
+			r.URL.Query().Get("reverse") == "true",
+			r.URL.Query().Get("id"),
+		)
 	}()
 	if err != nil {
 		log.Printf("failed to make query: %s", err.Error())
@@ -146,21 +145,24 @@ func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*imageResponse, error) {
+func (app *App) fetchImages(ctx context.Context, query *firestore.Query) ([]*imageResponse, error) {
 	images := []*imageResponse{}
-	iter := app.dsClient.Run(ctx, query)
+	iter := query.Documents(ctx)
 	for {
-		var image entity.Image
-		key, err := iter.Next(&image)
+		document, err := iter.Next()
 		if err != nil {
-			if err == iterator.Done {
+			if errors.Is(err, iterator.Done) {
 				break
 			} else {
 				return nil, err
 			}
 		}
+		var image entity.Image
+		if err := document.DataTo(&image); err != nil {
+			return nil, err
+		}
 		images = append(images, &imageResponse{
-			ID:          key.Name,
+			ID:          image.ID,
 			ImageURL:    image.ImageURL,
 			Size:        image.Size,
 			Parts:       image.Parts,
@@ -175,42 +177,49 @@ func (app *App) fetchImages(ctx context.Context, query *datastore.Query) ([]*ima
 	return images, nil
 }
 
-func (app *App) makeQuery(q *query, reverse bool, key *datastore.Key) (*datastore.Query, error) {
-	query := datastore.NewQuery(entity.KindNameImage).Limit(limit)
+func (app *App) makeQuery(q *query, reverse bool, id string) (*firestore.Query, error) {
+	collection := app.fsClient.Collection(entity.KindNameImage)
+	query := collection.Limit(limit)
 	if q.Filter != nil {
 		for _, filter := range q.Filter {
-			query = query.Filter(filter.Str, filter.Value)
+			query = query.Where(filter.path, filter.op, filter.value)
 		}
 	}
 	if q.Order != nil {
-		field := q.Order.Field
+		path := q.Order.Field
 		if q.Order.Desc {
 			reverse = !reverse
 		}
-		if key != nil {
-			var inequality string
+		if id != "" {
+			var op string
 			if reverse {
-				inequality = "<="
+				op = "<="
 			} else {
-				inequality = ">="
+				op = ">="
 			}
-			if field != "__key__" {
-				image := &entity.Image{}
-				if err := app.dsClient.Get(context.Background(), key, image); err != nil {
-					return nil, err
-				}
-				switch field {
-				case "PublishedAt":
-					query = query.Filter(fmt.Sprintf("%s %s", field, inequality), image.PublishedAt)
-				}
-			} else {
-				query = query.Filter(fmt.Sprintf("__key__ %s", inequality), key)
+
+			var image entity.Image
+			document, err := collection.Doc(id).Get(context.Background())
+			if err != nil {
+				return nil, err
+			}
+			if err := document.DataTo(&image); err != nil {
+				return nil, err
+			}
+			switch path {
+			case "ID":
+				query = query.Where(path, op, image.ID)
+			case "PublishedAt":
+				query = query.Where(path, op, image.PublishedAt)
+			case "UpdatedAt":
+				query = query.Where(path, op, image.UpdatedAt)
 			}
 		}
 		if reverse {
-			field = "-" + field
+			query = query.OrderBy(path, firestore.Desc)
+		} else {
+			query = query.OrderBy(path, firestore.Asc)
 		}
-		query = query.Order(field)
 	}
-	return query, nil
+	return &query, nil
 }

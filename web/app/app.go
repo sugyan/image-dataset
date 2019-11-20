@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -20,7 +20,7 @@ const sessionUser = "user"
 // App struct
 type App struct {
 	firebase *firebase.App
-	dsClient *datastore.Client
+	fsClient *firestore.Client
 	session  sessions.Store
 }
 
@@ -35,13 +35,13 @@ func NewApp(projectID string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	dsClient, err := datastore.NewClient(ctx, projectID)
+	fsClient, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
 	return &App{
 		firebase: fbApp,
-		dsClient: dsClient,
+		fsClient: fsClient,
 		session:  sessions.NewCookieStore(sessionKey),
 	}, nil
 }

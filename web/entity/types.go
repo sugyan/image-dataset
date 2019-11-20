@@ -20,6 +20,7 @@ const (
 
 // Image type
 type Image struct {
+	ID          string
 	ImageURL    string
 	SourceURL   string
 	PhotoURL    string

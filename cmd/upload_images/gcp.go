@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -16,14 +15,16 @@ import (
 	"strings"
 	"time"
 
-	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
 	"github.com/sugyan/image-dataset/web/entity"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type gcp struct {
 	csClient   *storage.Client
-	dsClient   *datastore.Client
+	fsClient   *firestore.Client
 	bucketName string
 }
 
@@ -37,13 +38,13 @@ func newGcp(projectID string) (*gcp, error) {
 	if os.Getenv("DEVELOPMENT") != "" {
 		bucketName = "staging." + bucketName
 	}
-	dsClient, err := datastore.NewClient(ctx, projectID)
+	fsClient, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
 	return &gcp{
 		csClient:   csClient,
-		dsClient:   dsClient,
+		fsClient:   fsClient,
 		bucketName: bucketName,
 	}, nil
 }
@@ -113,27 +114,28 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 	for i := 0; i < 68; i++ {
 		parts[i*2], parts[i*2+1] = data.Parts[i][0], data.Parts[i][1]
 	}
-	metaData := struct {
-		Angle   float32 `json:"angle"`
-		FaceID  int     `json:"face_id"`
-		PhotoID int     `json:"photo_id"`
-		LabelID int     `json:"label_id"`
-	}{
-		Angle: data.Angle,
+	metaData := map[string]interface{}{
+		"angle": data.Angle,
 	}
-	metaData.FaceID, _ = strconv.Atoi(data.Meta.FaceID)
-	metaData.PhotoID, _ = strconv.Atoi(data.Meta.PhotoID)
-	metaData.LabelID, _ = strconv.Atoi(data.Meta.LabelID)
+	if faceID, err := strconv.Atoi(data.Meta.FaceID); err == nil {
+		metaData["face_id"] = faceID
+	}
+	if photoID, err := strconv.Atoi(data.Meta.PhotoID); err == nil {
+		metaData["photo_id"] = photoID
+	}
+	if labelID, err := strconv.Atoi(data.Meta.LabelID); err == nil {
+		metaData["label_id"] = labelID
+	}
 	meta, err := json.Marshal(&metaData)
 	if err != nil {
 		return err
 	}
 
-	key := datastore.NameKey(entity.KindNameImage, keyName, nil)
 	var image entity.Image
-	if err := g.dsClient.Get(ctx, key, &image); err != nil {
-		if errors.Is(err, datastore.ErrNoSuchEntity) {
-			// create new entity if entity does not exist
+	docRef := g.fsClient.Collection(entity.KindNameImage).Doc(keyName)
+	document, err := docRef.Get(ctx)
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
 			image = entity.Image{
 				Status:    entity.StatusReady,
 				CreatedAt: time.Now(),
@@ -141,7 +143,12 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 		} else {
 			return err
 		}
+	} else {
+		if err := document.DataTo(&image); err != nil {
+			return err
+		}
 	}
+	image.ID = keyName
 	image.ImageURL = fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName)
 	image.SourceURL = data.Meta.SourceURL
 	image.PhotoURL = data.Meta.PhotoURL
@@ -154,7 +161,7 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 	image.PublishedAt = publishedAt
 	image.UpdatedAt = time.Now()
 	image.Meta = meta
-	if _, err := g.dsClient.Put(ctx, key, &image); err != nil {
+	if _, err := docRef.Set(ctx, &image); err != nil {
 		return err
 	}
 	return nil
