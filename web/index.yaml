@@ -1,33 +1,12 @@
 indexes:
 - kind: Image
   properties:
-  - name: __key__
-- kind: Image
-  properties:
-  - name: __key__
-    direction: desc
-- kind: Image
-  properties:
-  - name: UpdatedAt
-- kind: Image
-  properties:
-  - name: UpdatedAt
-    direction: desc
-- kind: Image
-  properties:
-  - name: PublishedAt
-- kind: Image
-  properties:
-  - name: PublishedAt
-    direction: desc
+  - name: Size0256
+  - name: ID
 - kind: Image
   properties:
   - name: Size0256
-  - name: __key__
-- kind: Image
-  properties:
-  - name: Size0256
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -50,11 +29,11 @@ indexes:
 - kind: Image
   properties:
   - name: Size0512
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Size0512
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -77,11 +56,11 @@ indexes:
 - kind: Image
   properties:
   - name: Size1024
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Size1024
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -104,11 +83,11 @@ indexes:
 - kind: Image
   properties:
   - name: Status
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Status
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -132,12 +111,12 @@ indexes:
   properties:
   - name: Status
   - name: Size0256
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Status
   - name: Size0256
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -165,12 +144,12 @@ indexes:
   properties:
   - name: Status
   - name: Size0512
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Status
   - name: Size0512
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -198,12 +177,12 @@ indexes:
   properties:
   - name: Status
   - name: Size1024
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: Status
   - name: Size1024
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -230,11 +209,11 @@ indexes:
 - kind: Image
   properties:
   - name: LabelName
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: LabelName
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -258,12 +237,12 @@ indexes:
   properties:
   - name: LabelName
   - name: Size0256
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: LabelName
   - name: Size0256
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -291,12 +270,12 @@ indexes:
   properties:
   - name: LabelName
   - name: Size0512
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: LabelName
   - name: Size0512
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -324,12 +303,12 @@ indexes:
   properties:
   - name: LabelName
   - name: Size1024
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: LabelName
   - name: Size1024
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:
@@ -357,12 +336,12 @@ indexes:
   properties:
   - name: LabelName
   - name: Status
-  - name: __key__
+  - name: ID
 - kind: Image
   properties:
   - name: LabelName
   - name: Status
-  - name: __key__
+  - name: ID
     direction: desc
 - kind: Image
   properties:

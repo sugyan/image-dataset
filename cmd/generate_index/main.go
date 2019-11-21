@@ -18,7 +18,7 @@ const (
 	nameSize0512 = "Size0512"
 	nameSize1024 = "Size1024"
 
-	nameKey         = "__key__"
+	nameKey         = "ID"
 	nameUpdatedAt   = "UpdatedAt"
 	namePublishedAt = "PublishedAt"
 
@@ -65,6 +65,9 @@ func main() {
 					})
 				}
 				for _, order := range []string{nameKey, nameUpdatedAt, namePublishedAt} {
+					if len(properties) == 0 {
+						continue
+					}
 					m.Indexes = append(m.Indexes,
 						&index{
 							Kind: kindImage,
