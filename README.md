@@ -12,7 +12,7 @@ go run web/main.go
 ## deployment
 
 ```sh
-go run cmd/generate_index/main.go > web/index.yaml
-gcloud app deploy web/index.yaml
+go run cmd/generate_index/main.go > firestore.indexes.json
+firebase deploy --only firestore:indexes
 gcloud app deploy web
 ```

@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 const (
-	kindImage = "Image"
+	collectionImage      = "Image"
+	queryScopeCollection = "COLLECTION"
 
 	nameLabelName = "LabelName"
 	nameStatus    = "Status"
@@ -18,68 +18,81 @@ const (
 	nameSize0512 = "Size0512"
 	nameSize1024 = "Size1024"
 
-	nameKey         = "ID"
+	nameID          = "ID"
 	nameUpdatedAt   = "UpdatedAt"
 	namePublishedAt = "PublishedAt"
 
-	directionDesc = "desc"
+	orderAsc  = "ASCENDING"
+	orderDesc = "DESCENDING"
 )
 
-type indexes struct {
-	Indexes []*index
+type indexesData struct {
+	Indexes        []*index         `json:"indexes"`
+	FieldOverrides []*fieldOverride `json:"fieldOverrides"`
 }
 
 type index struct {
-	Kind       string
-	Properties []*property
+	CollectionGroup string   `json:"collectionGroup"`
+	QueryScope      string   `json:"queryScope"`
+	Fields          []*field `json:"fields"`
 }
 
-type property struct {
-	Name      string
-	Direction string `yaml:",omitempty"`
+type fieldOverride struct {
+	CollectionGroup string        `json:"collectionGroup"`
+	FieldPath       string        `json:"fieldPath"`
+	Indexes         []interface{} `json:"indexes"`
+}
+
+type field struct {
+	FieldPath string `json:"fieldPath"`
+	Order     string `json:"order"`
 }
 
 func main() {
-	m := indexes{
-		Indexes: []*index{},
-	}
+	indexes := []*index{}
 	for _, labelName := range []string{"", nameLabelName} {
-		properties := []*property{}
+		fields := []*field{}
 		if labelName != "" {
-			properties = append(properties, &property{
-				Name: labelName,
+			fields = append(fields, &field{
+				FieldPath: labelName,
+				Order:     orderAsc,
 			})
 		}
 		for _, status := range []string{"", nameStatus} {
-			properties := properties
+			fields := fields
 			if status != "" {
-				properties = append(properties, &property{
-					Name: status,
+				fields = append(fields, &field{
+					FieldPath: status,
+					Order:     orderAsc,
 				})
 			}
 			for _, size := range []string{"", nameSize0256, nameSize0512, nameSize1024} {
-				properties := properties
+				fields := fields
 				if size != "" {
-					properties = append(properties, &property{
-						Name: size,
+					fields = append(fields, &field{
+						FieldPath: size,
+						Order:     orderAsc,
 					})
 				}
-				for _, order := range []string{nameKey, nameUpdatedAt, namePublishedAt} {
-					if len(properties) == 0 {
+				for _, order := range []string{nameID, nameUpdatedAt, namePublishedAt} {
+					if len(fields) == 0 {
 						continue
 					}
-					m.Indexes = append(m.Indexes,
+					indexes = append(indexes,
 						&index{
-							Kind: kindImage,
-							Properties: append(properties, &property{
-								Name: order,
+							CollectionGroup: collectionImage,
+							QueryScope:      queryScopeCollection,
+							Fields: append(fields, &field{
+								FieldPath: order,
+								Order:     orderAsc,
 							}),
 						},
 						&index{
-							Kind: kindImage,
-							Properties: append(properties, &property{
-								Name:      order,
-								Direction: directionDesc,
+							CollectionGroup: collectionImage,
+							QueryScope:      queryScopeCollection,
+							Fields: append(fields, &field{
+								FieldPath: order,
+								Order:     orderDesc,
 							}),
 						},
 					)
@@ -87,11 +100,27 @@ func main() {
 			}
 		}
 	}
-	out, err := yaml.Marshal(&m)
+	fieldOverrides := []*fieldOverride{
+		&fieldOverride{
+			CollectionGroup: collectionImage,
+			FieldPath:       "Meta",
+			Indexes:         []interface{}{},
+		},
+		&fieldOverride{
+			CollectionGroup: collectionImage,
+			FieldPath:       "Parts",
+			Indexes:         []interface{}{},
+		},
+	}
+	data := &indexesData{
+		Indexes:        indexes,
+		FieldOverrides: fieldOverrides,
+	}
+	out, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Fprint(os.Stdout, string(out))
+	fmt.Fprintln(os.Stdout, string(out))
 
-	log.Printf("%d indexes created", len(m.Indexes))
+	log.Printf("%d indexes, %d fieldOverrides", len(indexes), len(fieldOverrides))
 }

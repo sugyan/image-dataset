@@ -1,0 +1,1588 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "ID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "UpdatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0256",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size0512",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Image",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "LabelName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Size1024",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "PublishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "Image",
+      "fieldPath": "Meta",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "Image",
+      "fieldPath": "Parts",
+      "indexes": []
+    }
+  ]
+}
