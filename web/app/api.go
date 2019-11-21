@@ -30,52 +30,6 @@ type query struct {
 	Order  *queryOrder
 }
 
-func newQuery(r *http.Request) (*query, error) {
-	query := &query{Filter: []*queryFilter{}}
-
-	values := r.URL.Query()
-	if values.Get("name") != "" {
-		query.Filter = append(query.Filter, &queryFilter{
-			path:  "LabelName",
-			op:    "==",
-			value: values.Get("name"),
-		})
-	}
-	if values.Get("status") != "" && values.Get("status") != "all" {
-		status, err := strconv.Atoi(values.Get("status"))
-		if err != nil {
-			return nil, err
-		}
-		query.Filter = append(query.Filter, &queryFilter{
-			path:  "Status",
-			op:    "==",
-			value: status,
-		})
-	}
-	if values.Get("size") != "" && values.Get("size") != "all" {
-		if key, ok := sizeMap[values.Get("size")]; ok {
-			query.Filter = append(query.Filter, &queryFilter{
-				path:  key,
-				op:    "==",
-				value: true,
-			})
-		} else {
-			return nil, fmt.Errorf("invalid size query: %v", values.Get("size"))
-		}
-	}
-	if values.Get("sort") != "" {
-		if key, ok := sortMap[values.Get("sort")]; ok {
-			query.Order = &queryOrder{
-				Field: key,
-				Desc:  values.Get("order") == "desc",
-			}
-		} else {
-			return nil, fmt.Errorf("invalid sort query: %v", values.Get("sort"))
-		}
-	}
-	return query, nil
-}
-
 const limit = 30
 
 var (
@@ -92,17 +46,7 @@ var (
 )
 
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	query, err := func() (*firestore.Query, error) {
-		query, err := newQuery(r)
-		if err != nil {
-			return nil, err
-		}
-		return app.makeQuery(
-			query,
-			r.URL.Query().Get("reverse") == "true",
-			r.URL.Query().Get("id"),
-		)
-	}()
+	query, err := app.makeQuery(r)
 	if err != nil {
 		log.Printf("failed to make query: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -177,48 +121,87 @@ func (app *App) fetchImages(ctx context.Context, query *firestore.Query) ([]*ima
 	return images, nil
 }
 
-func (app *App) makeQuery(q *query, reverse bool, id string) (*firestore.Query, error) {
+func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
+	values := r.URL.Query()
 	collection := app.fsClient.Collection(entity.KindNameImage)
 	query := collection.Limit(limit)
-	if q.Filter != nil {
-		for _, filter := range q.Filter {
-			query = query.Where(filter.path, filter.op, filter.value)
+	// `Where`
+	{
+		filters := []*queryFilter{}
+		if values.Get("name") != "" {
+			filters = append(filters, &queryFilter{
+				path:  "LabelName",
+				op:    "==",
+				value: values.Get("name"),
+			})
 		}
-	}
-	if q.Order != nil {
-		path := q.Order.Field
-		if q.Order.Desc {
-			reverse = !reverse
-		}
-		if id != "" {
-			var op string
-			if reverse {
-				op = "<="
-			} else {
-				op = ">="
-			}
-
-			var image entity.Image
-			document, err := collection.Doc(id).Get(context.Background())
+		if values.Get("status") != "" && values.Get("status") != "all" {
+			status, err := strconv.Atoi(values.Get("status"))
 			if err != nil {
 				return nil, err
 			}
-			if err := document.DataTo(&image); err != nil {
-				return nil, err
-			}
-			switch path {
-			case "ID":
-				query = query.Where(path, op, image.ID)
-			case "PublishedAt":
-				query = query.Where(path, op, image.PublishedAt)
-			case "UpdatedAt":
-				query = query.Where(path, op, image.UpdatedAt)
+			filters = append(filters, &queryFilter{
+				path:  "Status",
+				op:    "==",
+				value: status,
+			})
+		}
+		if values.Get("size") != "" && values.Get("size") != "all" {
+			if key, ok := sizeMap[values.Get("size")]; ok {
+				filters = append(filters, &queryFilter{
+					path:  key,
+					op:    "==",
+					value: true,
+				})
+			} else {
+				return nil, fmt.Errorf("invalid size query: %v", values.Get("size"))
 			}
 		}
-		if reverse {
-			query = query.OrderBy(path, firestore.Desc)
-		} else {
-			query = query.OrderBy(path, firestore.Asc)
+		for _, filter := range filters {
+			query = query.Where(filter.path, filter.op, filter.value)
+		}
+	}
+	// `Order`
+	{
+		if values.Get("sort") != "" {
+			if path, ok := sortMap[values.Get("sort")]; ok {
+				reverse := values.Get("reverse") == "true"
+				if values.Get("order") == "desc" {
+					reverse = !reverse
+				}
+				if values.Get("id") != "" {
+					var op string
+					if reverse {
+						op = "<="
+					} else {
+						op = ">="
+					}
+
+					var image entity.Image
+					document, err := collection.Doc(values.Get("id")).Get(context.Background())
+					if err != nil {
+						return nil, err
+					}
+					if err := document.DataTo(&image); err != nil {
+						return nil, err
+					}
+					switch path {
+					case "ID":
+						query = query.Where(path, op, image.ID)
+					case "PublishedAt":
+						query = query.Where(path, op, image.PublishedAt)
+					case "UpdatedAt":
+						query = query.Where(path, op, image.UpdatedAt)
+					}
+				}
+				if reverse {
+					query = query.OrderBy(path, firestore.Desc)
+				} else {
+					query = query.OrderBy(path, firestore.Asc)
+				}
+			} else {
+				return nil, fmt.Errorf("invalid sort query: %v", values.Get("sort"))
+			}
 		}
 	}
 	return &query, nil
