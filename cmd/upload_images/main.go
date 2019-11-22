@@ -35,7 +35,7 @@ func run(projectID, datadir string) error {
 
 	errCh := make(chan error)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 30; i++ {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()
@@ -57,11 +57,7 @@ func walk(datadir string) (<-chan string, error) {
 	pathsCh := make(chan string)
 	go func() {
 		defer close(pathsCh)
-		i := 0
 		if err := filepath.Walk(datadir, func(path string, info os.FileInfo, err error) error {
-			if i >= 30 {
-				return nil
-			}
 			if err != nil {
 				return err
 			}
@@ -72,7 +68,6 @@ func walk(datadir string) (<-chan string, error) {
 				return nil
 			}
 			pathsCh <- path
-			i++
 			return nil
 		}); err != nil {
 			log.Fatal(err)
@@ -88,7 +83,7 @@ func worker(index int, projectID string, pathsCh <-chan string, errCh chan<- err
 		return
 	}
 	for filepath := range pathsCh {
-		log.Println(index, filepath)
+		log.Printf("[%02d] %s", index, filepath)
 		if err := gcp.upload(filepath); err != nil {
 			errCh <- fmt.Errorf("error [%s]: %s", filepath, err.Error())
 		}
