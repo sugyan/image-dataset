@@ -6,9 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/jpeg"
-	"image/png"
+	"io"
 	"os"
 	"path"
 	"strconv"
@@ -63,16 +61,11 @@ func (g *gcp) upload(filepath string) error {
 
 	// load image file
 	name := strings.TrimSuffix(path.Base(filepath), path.Ext(filepath))
-	imageFile, err := os.Open(path.Join(path.Dir(filepath), name+".png"))
+	imageFile, err := os.Open(path.Join(path.Dir(filepath), name+".jpg"))
 	if err != nil {
 		return err
 	}
 	defer imageFile.Close()
-
-	image, err := png.Decode(imageFile)
-	if err != nil {
-		return err
-	}
 
 	// calculate key name
 	hash := md5.New()
@@ -80,7 +73,7 @@ func (g *gcp) upload(filepath string) error {
 	keyName := hex.EncodeToString(hash.Sum(nil))
 
 	ctx := context.Background()
-	if err := g.writeCS(ctx, keyName, image); err != nil {
+	if err := g.writeCS(ctx, keyName, imageFile); err != nil {
 		return err
 	}
 	if err := g.writeDS(ctx, keyName, data); err != nil {
@@ -89,11 +82,11 @@ func (g *gcp) upload(filepath string) error {
 	return nil
 }
 
-func (g *gcp) writeCS(ctx context.Context, objectName string, image image.Image) error {
+func (g *gcp) writeCS(ctx context.Context, objectName string, image io.Reader) error {
 	obj := g.csClient.Bucket(g.bucketName).Object(fmt.Sprintf("images/%s", objectName))
 
 	w := obj.NewWriter(ctx)
-	if err := jpeg.Encode(w, image, &jpeg.Options{Quality: 100}); err != nil {
+	if _, err := io.Copy(w, image); err != nil {
 		return err
 	}
 	if err := w.Close(); err != nil {
@@ -106,7 +99,7 @@ func (g *gcp) writeCS(ctx context.Context, objectName string, image image.Image)
 }
 
 func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
-	publishedAt, err := time.Parse("2006-01-02 15:04:05", data.Meta.PublishedAt)
+	publishedAt, err := time.Parse("2006-01-02T15:04:05", data.Meta.PublishedAt)
 	if err != nil {
 		return err
 	}
@@ -116,9 +109,6 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 	}
 	metaData := map[string]interface{}{
 		"angle": data.Angle,
-	}
-	if faceID, err := strconv.Atoi(data.Meta.FaceID); err == nil {
-		metaData["face_id"] = faceID
 	}
 	if photoID, err := strconv.Atoi(data.Meta.PhotoID); err == nil {
 		metaData["photo_id"] = photoID
