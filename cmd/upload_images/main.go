@@ -4,12 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 )
 
 func main() {
@@ -87,6 +85,5 @@ func worker(index int, projectID string, pathsCh <-chan string, errCh chan<- err
 		if err := gcp.upload(filepath); err != nil {
 			errCh <- fmt.Errorf("error [%s]: %s", filepath, err.Error())
 		}
-		time.Sleep(time.Millisecond * time.Duration(rand.Intn(500)))
 	}
 }

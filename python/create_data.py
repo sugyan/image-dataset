@@ -27,6 +27,7 @@ def run(datafile, data_dir):
         except Exception as e:
             print(f'{url}: {e}')
             time.sleep(0.5)
+        return None
 
     detector = Detector()
     with open(datafile, 'r') as fp:
@@ -35,6 +36,8 @@ def run(datafile, data_dir):
             photo_url = row[1]
             print(photo_url)
             img = download(photo_url)
+            if img is None:
+                continue
             result = detector.detect(img)
             if result is None:
                 continue
