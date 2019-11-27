@@ -5,6 +5,7 @@ import { GlobalHotKeys } from "react-hotkeys";
 import {
     Box, Button, ButtonGroup, Grid, Link, Typography, Breadcrumbs,
     Table, TableBody, TableRow, TableCell,
+    makeStyles,
 } from "@material-ui/core";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 
@@ -13,10 +14,18 @@ import { ImageResponse } from "../common/interfaces";
 const bufferLength = 100;
 const bufferThreshold = 20;
 
+const useStyles = makeStyles({
+    tableCell: {
+        width: "80%",
+        maxWidth: 0,
+    },
+});
+
 const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
+    const classes = useStyles();
     const meta = Object.entries(JSON.parse(image.meta)).map((value, index) => {
         return (
-          <Box key={index}fontFamily="Monospace">{value[0]}: {value[1]}</Box>
+          <Box key={index} fontFamily="Monospace" fontSize="body1.fontSize">{value[0]}: {value[1]}</Box>
         );
     });
     const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
@@ -50,8 +59,12 @@ const InfoTable: React.FC<ImageResponse> = (image: ImageResponse) => {
           </TableRow>
           <TableRow>
             <TableCell component="th" scope="row">Photo URL</TableCell>
-            <TableCell>
-              <Link href={image.photo_url} target="_blank" rel="noopener">{image.photo_url}</Link>
+            <TableCell className={classes.tableCell}>
+              <Link href={image.photo_url} target="_blank" rel="noopener">
+                <Typography variant="inherit" noWrap={true} display="block">
+                  {image.photo_url}
+                </Typography>
+              </Link>
             </TableCell>
           </TableRow>
           <TableRow>
@@ -272,7 +285,9 @@ const ImageViewer: React.FC = () => {
               </Box>
             </Grid>
           </Grid>
-          <Grid>{current && <InfoTable {...current} />}</Grid>
+          <Grid item xs={6}>
+            {current && <InfoTable {...current} />}
+          </Grid>
         </Grid>
         <GlobalHotKeys keyMap={keyMap} handlers={handlers} allowChanges={true} />
       </div>
