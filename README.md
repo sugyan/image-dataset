@@ -55,3 +55,9 @@ go run cmd/generate_index/main.go > firestore.indexes.json
 firebase deploy --only firestore:indexes
 gcloud app deploy web
 ```
+
+## dump images
+
+```sh
+go run cmd/dump_data/main.go -projectID <Project ID> -num 10000
+```
