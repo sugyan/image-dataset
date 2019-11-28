@@ -1,3 +1,4 @@
+import CSS from "csstype";
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
@@ -16,11 +17,14 @@ const useStyles = makeStyles((theme: Theme) => {
             margin: theme.spacing(2),
         },
         card: {
-            maxWidth: 148,
+            maxWidth: 144,
+        },
+        cardContent: {
+            padding: theme.spacing(1.5),
         },
         media: {
-            height: 148,
-            width: 148,
+            height: 144,
+            width: 144,
         },
     });
 });
@@ -36,6 +40,7 @@ const Images: React.FC = () => {
             return;
         }
         const params = new URLSearchParams(location.search);
+        params.set("count", "100");
         setImages([]);
         setLoading(true);
         fetch(`/api/images?${params}`).then((res: Response) => {
@@ -67,9 +72,25 @@ const Images: React.FC = () => {
                 );
             },
         );
+        const style: CSS.Properties = {
+            borderStyle: "solid",
+            borderWidth: "2px",
+            borderColor: "transparent",
+        };
+        switch (image.status) {
+        case 1:
+            style.borderColor = "lightcoral";
+            break;
+        case 2:
+            style.borderColor = "gray";
+            break;
+        case 3:
+            style.borderColor = "lightgreen";
+            break;
+        }
         return (
-          <Box key={image.id} m={0.25}>
-            <Card className={classes.card}>
+          <Box key={image.id} m={0.2}>
+            <Card className={classes.card} style={style}>
               <Link component={link}>
                 <CardActionArea>
                   <CardMedia
@@ -77,7 +98,7 @@ const Images: React.FC = () => {
                       image={image.image_url} />
                 </CardActionArea>
               </Link>
-              <CardContent>
+              <CardContent className={classes.cardContent}>
                 <Typography variant="body2">
                   {image.size}×{image.size}
                 </Typography>

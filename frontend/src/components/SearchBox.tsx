@@ -58,6 +58,7 @@ const SearchBox: React.FC = () => {
         setOrder(event.target.value);
     };
     const resetForm = () => {
+        setStatus("all");
         setSize("all");
         setSort("id");
         setOrder("asc");

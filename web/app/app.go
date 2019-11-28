@@ -54,6 +54,7 @@ func (app *App) Handler() http.Handler {
 
 	api := router.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/images", app.imagesHandler).Methods("GET")
+	api.HandleFunc("/image/{id}", app.updateImageHandler).Methods("PUT")
 	api.HandleFunc("/userinfo", app.userinfoHandler).Methods("GET")
 	api.Use(app.authMiddleware)
 

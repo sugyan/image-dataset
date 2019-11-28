@@ -8,10 +8,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/gorilla/mux"
 	"github.com/sugyan/image-dataset/web/entity"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type queryFilter struct {
@@ -67,6 +71,45 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *App) updateImageHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	docRef := app.fsClient.Collection(entity.KindNameImage).Doc(vars["id"])
+	doc, err := docRef.Get(r.Context())
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			http.NotFound(w, r)
+		} else {
+			log.Printf("failed to get document: %s", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		return
+	}
+	var image entity.Image
+	if err := doc.DataTo(&image); err != nil {
+		log.Printf("failed to retrieve image from document: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	var data struct {
+		Status int `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		log.Printf("failed to decode json: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if int(image.Status) != data.Status {
+		image.Status = entity.Status(data.Status)
+		image.UpdatedAt = time.Now()
+		if _, err := docRef.Set(r.Context(), &image); err != nil {
+			log.Printf("failed to set document: %s", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	client, err := app.firebase.Auth(ctx)
@@ -109,6 +152,7 @@ func (app *App) fetchImages(ctx context.Context, query *firestore.Query) ([]*ima
 			ID:          image.ID,
 			ImageURL:    image.ImageURL,
 			Size:        image.Size,
+			Status:      int(image.Status),
 			Parts:       image.Parts,
 			LabelName:   image.LabelName,
 			SourceURL:   image.SourceURL,
@@ -124,7 +168,16 @@ func (app *App) fetchImages(ctx context.Context, query *firestore.Query) ([]*ima
 func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 	values := r.URL.Query()
 	collection := app.fsClient.Collection(entity.KindNameImage)
-	query := collection.Limit(limit)
+	query := collection.Query
+	if values.Get("count") != "" {
+		count, err := strconv.Atoi(values.Get("count"))
+		if err != nil {
+			return nil, err
+		}
+		query = query.Limit(count)
+	} else {
+		query = query.Limit(limit)
+	}
 	// `Where`
 	{
 		filters := []*queryFilter{}

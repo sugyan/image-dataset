@@ -39,10 +39,10 @@ func (app *App) uid(ctx context.Context) string {
 func (app *App) signinHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	// verify ID token
-	data := &struct {
+	var data struct {
 		Token string `json:"token"`
-	}{}
-	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
+	}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("failed to decode json: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return

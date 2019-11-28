@@ -3,10 +3,13 @@ import { useHistory, useLocation, useParams } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import { GlobalHotKeys } from "react-hotkeys";
 import {
-    Box, Button, ButtonGroup, Grid, Link, Typography, Breadcrumbs,
+    Box, Button, Grid, Link, Typography, Breadcrumbs,
     Table, TableBody, TableRow, TableCell,
     makeStyles,
 } from "@material-ui/core";
+import {
+    ToggleButtonGroup, ToggleButton,
+} from "@material-ui/lab";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 
 import { ImageResponse } from "../common/interfaces";
@@ -162,12 +165,23 @@ const ImageViewer: React.FC = () => {
         STATUS_2: () => updateStatus(2),
         STATUS_3: () => updateStatus(3),
     };
-    const updateStatus = (status: number) => {
-        // TODO
-        console.log(status);
+    const current = images.find((element: ImageResponse) => element.id === params.id);
+    const updateStatus = async (status: number) => {
+        const res: Response = await fetch(`/api/image/${params.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ status }),
+        });
+        if (res.ok) {
+            if (current) {
+                current.status = status;
+                current.updated_at = Math.floor(new Date().getTime() / 1000);
+            }
+            nextImage();
+        } else {
+            console.error(res.status);
+        }
     };
 
-    const current = images.find((element: ImageResponse) => element.id === params.id);
     useEffect(() => {
         const fetchData = async (id: string, reverse: boolean = false): Promise<ImageResponse[]> => {
             const params: URLSearchParams = new URLSearchParams(location.search);
@@ -272,11 +286,17 @@ const ImageViewer: React.FC = () => {
                 </Button>
               </Box>
               <Box>
-                <ButtonGroup color="primary">
-                  <Button onClick={() => updateStatus(1)}>NG</Button>
-                  <Button onClick={() => updateStatus(2)}>Pending</Button>
-                  <Button onClick={() => updateStatus(3)}>OK</Button>
-                </ButtonGroup>
+                <ToggleButtonGroup exclusive size="small" value={current && current.status}>
+                  <ToggleButton value={1} onClick={() => updateStatus(1)}>
+                    <Box mx={1}>NG</Box>
+                  </ToggleButton>
+                  <ToggleButton value={2} onClick={() => updateStatus(2)}>
+                    <Box mx={1}>Pending</Box>
+                  </ToggleButton>
+                  <ToggleButton value={3} onClick={() => updateStatus(3)}>
+                    <Box mx={1}>OK</Box>
+                  </ToggleButton>
+                </ToggleButtonGroup>
               </Box>
               <Box>
                 <Button onClick={() => nextImage()}>
