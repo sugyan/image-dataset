@@ -21,9 +21,6 @@ const useStyles = makeStyles((theme: Theme) => {
         title: {
             flexGrow: 1,
         },
-        email: {
-            marginRight: theme.spacing(1),
-        },
     });
 });
 
@@ -71,9 +68,6 @@ const App: React.FC = () => {
               <Link component={link} color="inherit">
                 Dataset
               </Link>
-            </Typography>
-            <Typography className={classes.email}>
-              {email}
             </Typography>
             {button}
           </Toolbar>

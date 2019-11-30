@@ -5,8 +5,9 @@ import { GlobalHotKeys } from "react-hotkeys";
 import {
     Box, Button, Grid, Link, Typography, Breadcrumbs,
     Table, TableBody, TableRow, TableCell,
-    makeStyles,
+    makeStyles, useTheme,
 } from "@material-ui/core";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 import {
     ToggleButtonGroup, ToggleButton,
 } from "@material-ui/lab";
@@ -105,8 +106,8 @@ const Canvas: React.FC<{ size: number, image: ImageResponse | undefined }> = ({ 
         const ctx = canvas.current.getContext("2d")!;
         const img = new Image();
         img.onload = () => {
-            const scale = image.size / 512;
-            ctx.drawImage(img, 0, 0, 512, 512);
+            const scale = image.size / size;
+            ctx.drawImage(img, 0, 0, size, size);
             ctx.strokeStyle = "cyan";
             ctx.lineWidth = 2;
             for (let i = 0; i < 68; i++) {
@@ -128,6 +129,8 @@ const Canvas: React.FC<{ size: number, image: ImageResponse | undefined }> = ({ 
 };
 
 const ImageViewer: React.FC = () => {
+    const theme = useTheme();
+    const matches = useMediaQuery(theme.breakpoints.up("sm"));
     const history = useHistory();
     const location = useLocation();
     const params = useParams<{ id: string }>();
@@ -275,9 +278,9 @@ const ImageViewer: React.FC = () => {
           </Breadcrumbs>
         </Box>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={12} lg={6}>
             <Grid container justify="center">
-              <Canvas size={512} image={current} />
+              <Canvas size={matches ? 512 : 384} image={current} />
             </Grid>
             <Grid container justify="space-between">
               <Box>
@@ -305,7 +308,7 @@ const ImageViewer: React.FC = () => {
               </Box>
             </Grid>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} lg={6}>
             {current && <InfoTable {...current} />}
           </Grid>
         </Grid>
