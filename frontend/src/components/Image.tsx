@@ -184,7 +184,6 @@ const ImageViewer: React.FC = () => {
             console.error(res.status);
         }
     };
-
     useEffect(() => {
         const fetchData = async (id: string, reverse: boolean = false): Promise<ImageResponse[]> => {
             const params: URLSearchParams = new URLSearchParams(location.search);
@@ -203,7 +202,6 @@ const ImageViewer: React.FC = () => {
                 return Promise.reject(res.status);
             }
         };
-
         const requests: [Promise<ImageResponse[]>, Promise<ImageResponse[]>] = [
             Promise.resolve([]),
             Promise.resolve([]),

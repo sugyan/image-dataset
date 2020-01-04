@@ -1,9 +1,10 @@
 import CSS from "csstype";
-import React, { useEffect, useState } from "react";
+import H from "history";
+import React, { useEffect, useState, useRef } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Link as RouterLink, LinkProps } from "react-router-dom";
 import {
-    Card, CardActionArea, CardMedia, CardContent,
+    Button, Card, CardActionArea, CardMedia, CardContent,
     Box, CircularProgress, Grid, Link, Typography,
     Theme, makeStyles, createStyles,
 } from "@material-ui/core";
@@ -33,15 +34,15 @@ const Images: React.FC = () => {
     const classes = useStyles();
     const history = useHistory();
     const location = useLocation();
+    const last = useRef<string>();
     const [images, setImages] = useState<ImageResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    useEffect(() => {
-        if (location.search.length === 0) {
-            return;
-        }
+    const loadImages = (history: H.History, location: H.Location, images: ImageResponse[]) => {
         const params = new URLSearchParams(location.search);
         params.set("count", "100");
-        setImages([]);
+        if (last.current) {
+            params.set("id", last.current);
+        }
         setLoading(true);
         fetch(`/api/images?${params}`).then((res: Response) => {
             if (res.ok) {
@@ -53,13 +54,33 @@ const Images: React.FC = () => {
             }
             throw new Error(res.statusText);
         }).then((data: ImageResponse[]) => {
-            setImages(data);
+            if (data.length > 0) {
+                last.current = data[data.length - 1].id;
+            }
+            const ids = new Set(images.map((value: ImageResponse) => value.id));
+            setImages(images.concat(data.filter((value: ImageResponse) => {
+                return !ids.has(value.id);
+            })));
         }).catch((err: Error) => {
             window.console.error(err.message);
         }).finally(() => {
             setLoading(false);
         });
-    }, [history, location]);
+    };
+    useEffect(() => {
+        if (location.search.length === 0) {
+            return;
+        }
+        if (images.length > 0) {
+            if (last.current && last.current === images[images.length - 1].id) {
+                return;
+            }
+        }
+        loadImages(history, location, images);
+    }, [history, location, images]);
+    useEffect(() => {
+        setImages([]);
+    }, [location]);
     const cards = images.map((image: ImageResponse) => {
         const link = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, "to">>(
             (props, ref) => {
@@ -119,10 +140,14 @@ const Images: React.FC = () => {
       <React.Fragment>
         <h2>Images</h2>
         <SearchBox />
-        {loading && progress}
         <Box display="flex" flexWrap="wrap" mt={2}>
           {cards}
         </Box>
+        {loading ? progress :<Grid container justify="center">
+          <Box mt={2}>
+            <Button color="inherit" onClick={() => loadImages(history, location, images)}>More</Button>
+          </Box>
+        </Grid>}
       </React.Fragment>
     );
 };
