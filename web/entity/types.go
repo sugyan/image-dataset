@@ -8,6 +8,7 @@ type Status int
 // Kind name
 const (
 	KindNameImage = "Image"
+	KindNameCount = "Count"
 )
 
 // Status values
@@ -35,4 +36,12 @@ type Image struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	Meta        []byte `datastore:",noindex"`
+}
+
+// Count type
+type Count struct {
+	Ready   int
+	NG      int
+	Pending int
+	OK      int
 }

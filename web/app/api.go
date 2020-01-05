@@ -14,8 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sugyan/image-dataset/web/entity"
 	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type queryFilter struct {
@@ -50,14 +48,7 @@ var (
 )
 
 func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
-	query, err := app.makeQuery(r)
-	if err != nil {
-		log.Printf("failed to make query: %s", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	// fetch forward and backward images
-	images, err := app.fetchImages(r.Context(), query)
+	images, err := app.fetchImages(r)
 	if err != nil {
 		log.Printf("failed to fetch data: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -73,41 +64,43 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *App) updateImageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	docRef := app.fsClient.Collection(entity.KindNameImage).Doc(vars["id"])
-	doc, err := docRef.Get(r.Context())
-	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			http.NotFound(w, r)
-		} else {
-			log.Printf("failed to get document: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		return
-	}
-	var image entity.Image
-	if err := doc.DataTo(&image); err != nil {
-		log.Printf("failed to retrieve image from document: %s", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
 	var data struct {
 		Status int `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("failed to decode json: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	if err := app.updateImage(r.Context(), vars["id"], data.Status); err != nil {
+		log.Printf("failed to update status: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	if int(image.Status) != data.Status {
-		image.Status = entity.Status(data.Status)
-		image.UpdatedAt = time.Now()
-		if _, err := docRef.Set(r.Context(), &image); err != nil {
-			log.Printf("failed to set document: %s", err.Error())
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
+	query := app.fsClient.Collection(entity.KindNameCount).Query
+	iter := query.Documents(r.Context())
+
+	documents, err := iter.GetAll()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+	log.Printf("%d documents", len(documents))
+	for _, d := range documents {
+		log.Printf("%v", d.Ref.ID)
+		var count entity.Count
+		if err := d.DataTo(&count); err != nil {
+			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+		log.Printf("%#v", count)
 	}
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -132,9 +125,13 @@ func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) fetchImages(ctx context.Context, query *firestore.Query) ([]*imageResponse, error) {
+func (app *App) fetchImages(r *http.Request) ([]*imageResponse, error) {
+	query, err := app.makeQuery(r)
+	if err != nil {
+		return nil, err
+	}
 	images := []*imageResponse{}
-	iter := query.Documents(ctx)
+	iter := query.Documents(r.Context())
 	for {
 		document, err := iter.Next()
 		if err != nil {
@@ -258,4 +255,46 @@ func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 		}
 	}
 	return &query, nil
+}
+
+func (app *App) updateImage(ctx context.Context, id string, status int) error {
+	return app.fsClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		docRef := app.fsClient.Collection(entity.KindNameImage).Doc(id)
+		doc, err := tx.Get(docRef)
+		if err != nil {
+			log.Printf("failed to get document: %s", err.Error())
+			return err
+		}
+		var image entity.Image
+		if err := doc.DataTo(&image); err != nil {
+			log.Printf("failed to retrieve image from document: %s", err.Error())
+			return err
+		}
+		if int(image.Status) != status {
+			log.Printf("update status from %d to %d", image.Status, status)
+			// Update counts
+			for i, b := range []bool{image.Size0256, image.Size0512, image.Size1024} {
+				if b {
+					docID := []string{"0256", "0512", "1024"}[i]
+					log.Printf("%v %v: %s", i, b, docID)
+					ref := app.fsClient.Collection(entity.KindNameCount).Doc(docID)
+					if err := tx.Update(ref, []firestore.Update{
+						// TODO
+						{Path: "Ready", Value: firestore.Increment(1)},
+					}); err != nil {
+						return err
+					}
+				}
+			}
+			// Update status
+			image.Status = entity.Status(status)
+			image.UpdatedAt = time.Now()
+			if err := tx.Set(docRef, &image); err != nil {
+				log.Printf("failed to set document: %s", err.Error())
+				return err
+			}
+
+		}
+		return nil
+	})
 }
