@@ -19,6 +19,22 @@ const (
 	StatusOK
 )
 
+// Path of status
+func (s Status) Path() string {
+	switch s {
+	case StatusReady:
+		return "Ready"
+	case StatusNG:
+		return "NG"
+	case StatusPending:
+		return "Pending"
+	case StatusOK:
+		return "OK"
+	default:
+		return ""
+	}
+}
+
 // Image type
 type Image struct {
 	ID          string

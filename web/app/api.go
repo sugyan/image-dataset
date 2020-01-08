@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sugyan/image-dataset/web/entity"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type queryFilter struct {
@@ -65,7 +67,7 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 func (app *App) updateImageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var data struct {
-		Status int `json:"status"`
+		Status entity.Status `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("failed to decode json: %s", err.Error())
@@ -81,26 +83,45 @@ func (app *App) updateImageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
-	query := app.fsClient.Collection(entity.KindNameCount).Query
-	iter := query.Documents(r.Context())
-
-	documents, err := iter.GetAll()
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-	}
-	log.Printf("%d documents", len(documents))
-	for _, d := range documents {
-		log.Printf("%v", d.Ref.ID)
-		var count entity.Count
-		if err := d.DataTo(&count); err != nil {
-			log.Println(err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
+	results := []*countResponse{}
+	collection := app.fsClient.Collection(entity.KindNameCount)
+	if err := func() error {
+		docIDs := []string{"0256", "0512", "1024"}
+		for _, docID := range docIDs {
+			docRef := collection.Doc(docID)
+			doc, err := docRef.Get(r.Context())
+			var count entity.Count
+			if err != nil {
+				if status.Code(err) == codes.NotFound {
+					docRef.Set(r.Context(), &count)
+				} else {
+					return err
+				}
+			} else {
+				if err := doc.DataTo(&count); err != nil {
+					return err
+				}
+			}
+			results = append(results, &countResponse{
+				Size:    docID,
+				Ready:   count.Ready,
+				NG:      count.NG,
+				Pending: count.Pending,
+				OK:      count.OK,
+			})
 		}
-		log.Printf("%#v", count)
+		return nil
+	}(); err != nil {
+		log.Printf("failed to load stats: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(&results); err != nil {
+		log.Printf("failed to encode user info: %s", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *App) userinfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +278,7 @@ func (app *App) makeQuery(r *http.Request) (*firestore.Query, error) {
 	return &query, nil
 }
 
-func (app *App) updateImage(ctx context.Context, id string, status int) error {
+func (app *App) updateImage(ctx context.Context, id string, status entity.Status) error {
 	return app.fsClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		docRef := app.fsClient.Collection(entity.KindNameImage).Doc(id)
 		doc, err := tx.Get(docRef)
@@ -270,17 +291,15 @@ func (app *App) updateImage(ctx context.Context, id string, status int) error {
 			log.Printf("failed to retrieve image from document: %s", err.Error())
 			return err
 		}
-		if int(image.Status) != status {
-			log.Printf("update status from %d to %d", image.Status, status)
+		if image.Status != status {
 			// Update counts
 			for i, b := range []bool{image.Size0256, image.Size0512, image.Size1024} {
 				if b {
 					docID := []string{"0256", "0512", "1024"}[i]
-					log.Printf("%v %v: %s", i, b, docID)
 					ref := app.fsClient.Collection(entity.KindNameCount).Doc(docID)
 					if err := tx.Update(ref, []firestore.Update{
-						// TODO
-						{Path: "Ready", Value: firestore.Increment(1)},
+						{Path: image.Status.Path(), Value: firestore.Increment(-1)},
+						{Path: status.Path(), Value: firestore.Increment(1)},
 					}); err != nil {
 						return err
 					}

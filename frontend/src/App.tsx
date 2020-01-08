@@ -2,13 +2,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter, Link as RouterLink, LinkProps, Route } from "react-router-dom";
 import {
     AppBar, Button, Container, Link, Toolbar, Typography,
-    Theme, makeStyles, createStyles,
+    makeStyles, createStyles,
 } from "@material-ui/core";
 
 import Signin from "./components/Signin";
 import Menu from "./components/Menu";
 import Image from "./components/Image";
 import Images from "./components/Images";
+import Stats from "./components/Stats";
 
 interface UserInfo {
     displayName: string
@@ -16,7 +17,7 @@ interface UserInfo {
     rawId: string
 }
 
-const useStyles = makeStyles((theme: Theme) => {
+const useStyles = makeStyles(() => {
     return createStyles({
         title: {
             flexGrow: 1,
@@ -76,6 +77,7 @@ const App: React.FC = () => {
           <Route path="/" exact component={email ? Menu : Signin}></Route>
           <Route path="/image/:id" component={Image}></Route>
           <Route path="/images" exact component={Images}></Route>
+          <Route path="/stats" exact component={Stats}></Route>
         </Container>
       </BrowserRouter>
     );
