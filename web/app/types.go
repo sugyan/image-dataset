@@ -13,3 +13,11 @@ type imageResponse struct {
 	UpdatedAt   int64  `json:"updated_at"`
 	Meta        string `json:"meta"`
 }
+
+type countResponse struct {
+	Size    string `json:"size"`
+	Ready   int    `json:"status_ready"`
+	NG      int    `json:"status_ng"`
+	Pending int    `json:"status_pending"`
+	OK      int    `json:"status_ok"`
+}

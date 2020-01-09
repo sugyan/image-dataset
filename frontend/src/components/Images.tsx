@@ -54,9 +54,10 @@ const Images: React.FC = () => {
             }
             throw new Error(res.statusText);
         }).then((data: ImageResponse[]) => {
-            if (data.length > 0) {
-                last.current = data[data.length - 1].id;
+            if (data.length === 0) {
+                return;
             }
+            last.current = data[data.length - 1].id;
             const ids = new Set(images.map((value: ImageResponse) => value.id));
             setImages(images.concat(data.filter((value: ImageResponse) => {
                 return !ids.has(value.id);
