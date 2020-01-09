@@ -80,6 +80,9 @@ const Images: React.FC = () => {
         loadImages(history, location, images);
     }, [history, location, images]);
     useEffect(() => {
+        if (last.current) {
+            last.current = undefined;
+        }
         setImages([]);
     }, [location]);
     const cards = images.map((image: ImageResponse) => {
