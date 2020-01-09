@@ -76,7 +76,7 @@ func (g *gcp) upload(filepath string) error {
 	if err := g.writeCS(ctx, keyName, imageFile); err != nil {
 		return err
 	}
-	if err := g.writeDS(ctx, keyName, data); err != nil {
+	if err := g.writeFS(ctx, keyName, data); err != nil {
 		return err
 	}
 	return nil
@@ -98,7 +98,7 @@ func (g *gcp) writeCS(ctx context.Context, objectName string, image io.Reader) e
 	return nil
 }
 
-func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
+func (g *gcp) writeFS(ctx context.Context, keyName string, data *data) error {
 	publishedAt, err := time.Parse("2006-01-02T15:04:05", data.Meta.PublishedAt)
 	if err != nil {
 		return err
@@ -121,38 +121,49 @@ func (g *gcp) writeDS(ctx context.Context, keyName string, data *data) error {
 		return err
 	}
 
-	var image entity.Image
-	docRef := g.fsClient.Collection(entity.KindNameImage).Doc(keyName)
-	document, err := docRef.Get(ctx)
-	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			image = entity.Image{
-				Status:    entity.StatusReady,
-				CreatedAt: time.Now(),
+	return g.fsClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		var image entity.Image
+		docRef := g.fsClient.Collection(entity.KindNameImage).Doc(keyName)
+		document, err := tx.Get(docRef)
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				image = entity.Image{
+					Status:    entity.StatusReady,
+					CreatedAt: time.Now(),
+				}
+				// Update counts
+				for i, size := range []int{256, 512, 1024} {
+					if data.Size >= size {
+						docID := []string{"0256", "0512", "1024"}[i]
+						ref := g.fsClient.Collection(entity.KindNameCount).Doc(docID)
+						if err := tx.Update(ref, []firestore.Update{
+							{Path: entity.StatusReady.Path(), Value: firestore.Increment(1)},
+						}); err != nil {
+							return err
+						}
+					}
+				}
+			} else {
+				return err
 			}
 		} else {
-			return err
+			if err := document.DataTo(&image); err != nil {
+				return err
+			}
 		}
-	} else {
-		if err := document.DataTo(&image); err != nil {
-			return err
-		}
-	}
-	image.ID = keyName
-	image.ImageURL = fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName)
-	image.SourceURL = data.Meta.SourceURL
-	image.PhotoURL = data.Meta.PhotoURL
-	image.Size = data.Size
-	image.Size0256 = data.Size >= 256
-	image.Size0512 = data.Size >= 512
-	image.Size1024 = data.Size >= 1024
-	image.Parts = parts
-	image.LabelName = data.Meta.LabelName
-	image.PublishedAt = publishedAt
-	image.UpdatedAt = time.Now()
-	image.Meta = meta
-	if _, err := docRef.Set(ctx, &image); err != nil {
-		return err
-	}
-	return nil
+		image.ID = keyName
+		image.ImageURL = fmt.Sprintf("https://storage.googleapis.com/%s/images/%s", g.bucketName, keyName)
+		image.SourceURL = data.Meta.SourceURL
+		image.PhotoURL = data.Meta.PhotoURL
+		image.Size = data.Size
+		image.Size0256 = data.Size >= 256
+		image.Size0512 = data.Size >= 512
+		image.Size1024 = data.Size >= 1024
+		image.Parts = parts
+		image.LabelName = data.Meta.LabelName
+		image.PublishedAt = publishedAt
+		image.UpdatedAt = time.Now()
+		image.Meta = meta
+		return tx.Set(docRef, &image)
+	})
 }
