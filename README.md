@@ -59,5 +59,5 @@ gcloud app deploy web
 ## dump images
 
 ```sh
-go run cmd/dump_data/main.go -projectID <Project ID> -num 10000
+go run cmd/dump_data/main.go -projectID <Project ID> -size 500 -num 10000 -status OK
 ```
