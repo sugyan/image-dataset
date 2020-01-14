@@ -58,7 +58,7 @@ func (app *App) imagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(&images); err != nil {
-		log.Printf("failed to encode user info: %s", err.Error())
+		log.Printf("failed to encode images: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -118,7 +118,7 @@ func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(&results); err != nil {
-		log.Printf("failed to encode user info: %s", err.Error())
+		log.Printf("failed to encode stats: %s", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

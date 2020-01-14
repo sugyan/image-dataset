@@ -17,6 +17,7 @@ const (
 	StatusNG
 	StatusPending
 	StatusOK
+	StatusPredicted
 )
 
 // Path of status
@@ -30,6 +31,8 @@ func (s Status) Path() string {
 		return "Pending"
 	case StatusOK:
 		return "OK"
+	case StatusPredicted:
+		return "Predicted"
 	default:
 		return ""
 	}
@@ -56,8 +59,9 @@ type Image struct {
 
 // Count type
 type Count struct {
-	Ready   int
-	NG      int
-	Pending int
-	OK      int
+	Ready     int
+	NG        int
+	Pending   int
+	OK        int
+	Predicted int
 }

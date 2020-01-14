@@ -19,9 +19,10 @@ const sessionUser = "user"
 
 // App struct
 type App struct {
-	firebase *firebase.App
-	fsClient *firestore.Client
-	session  sessions.Store
+	firebase   *firebase.App
+	fsClient   *firestore.Client
+	session    sessions.Store
+	adminToken string
 }
 
 // NewApp function
@@ -39,10 +40,12 @@ func NewApp(projectID string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &App{
-		firebase: fbApp,
-		fsClient: fsClient,
-		session:  sessions.NewCookieStore(sessionKey),
+		firebase:   fbApp,
+		fsClient:   fsClient,
+		session:    sessions.NewCookieStore(sessionKey),
+		adminToken: os.Getenv("ADMIN_TOKEN"),
 	}, nil
 }
 

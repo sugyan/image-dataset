@@ -5,16 +5,29 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"firebase.google.com/go/auth"
 )
 
 type contextKey string
 
-const contextKeyUID contextKey = "uid"
+const (
+	contextKeyUID contextKey = "uid"
+	bearerPrefix  string     = "Bearer "
+)
 
 func (app *App) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, bearerPrefix) {
+			token := strings.TrimPrefix(authHeader, bearerPrefix)
+			if token == app.adminToken {
+				r = r.WithContext(context.WithValue(r.Context(), contextKeyUID, "admin"))
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
 		session, err := app.session.Get(r, sessionUser)
 		if err != nil {
 			log.Printf("failed to get session: %s", err.Error())
