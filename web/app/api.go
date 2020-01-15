@@ -103,11 +103,12 @@ func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			results = append(results, &countResponse{
-				Size:    docID,
-				Ready:   count.Ready,
-				NG:      count.NG,
-				Pending: count.Pending,
-				OK:      count.OK,
+				Size:      docID,
+				Ready:     count.Ready,
+				NG:        count.NG,
+				Pending:   count.Pending,
+				OK:        count.OK,
+				Predicted: count.Predicted,
 			})
 		}
 		return nil

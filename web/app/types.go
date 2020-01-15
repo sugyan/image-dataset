@@ -15,9 +15,10 @@ type imageResponse struct {
 }
 
 type countResponse struct {
-	Size    string `json:"size"`
-	Ready   int    `json:"status_ready"`
-	NG      int    `json:"status_ng"`
-	Pending int    `json:"status_pending"`
-	OK      int    `json:"status_ok"`
+	Size      string `json:"size"`
+	Ready     int    `json:"status_ready"`
+	NG        int    `json:"status_ng"`
+	Pending   int    `json:"status_pending"`
+	OK        int    `json:"status_ok"`
+	Predicted int    `json:"status_predicted"`
 }
