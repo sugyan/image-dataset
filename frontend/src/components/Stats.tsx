@@ -26,6 +26,7 @@ const Stats: React.FC = () => {
             <TableCell>{v["status_ng"]}</TableCell>
             <TableCell>{v["status_pending"]}</TableCell>
             <TableCell>{v["status_ok"]}</TableCell>
+            <TableCell>{v["status_predicted"]}</TableCell>
           </TableRow>
         );
     });
@@ -41,6 +42,7 @@ const Stats: React.FC = () => {
                 <TableCell>NG</TableCell>
                 <TableCell>Pending</TableCell>
                 <TableCell>OK</TableCell>
+                <TableCell>Predicted</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{rows}</TableBody>

@@ -126,6 +126,11 @@ const SearchBox: React.FC = () => {
                     = OK
                   </Box>
                 </MenuItem>
+                <MenuItem value={"4"}>
+                  <Box fontSize="body1.fontSize" fontFamily="Monospace">
+                    = Predicted
+                  </Box>
+                </MenuItem>
               </Select>
             </FormControl>
             <FormControl className={classes.formControl}>
