@@ -24,7 +24,7 @@ python create_data.py data.tsv
 ### upload data
 
 ```sh
-DEVELOPMENT=true go run cmd/upload_images/*.go -datadir python/data -projectID <Project ID>
+go run cmd/upload_images/*.go -datadir python/data -projectID <Project ID>
 ```
 
 
@@ -51,6 +51,10 @@ npm start
 ## deployment
 
 ```sh
+(
+    cd frontend
+    npm run build
+)
 go run cmd/generate_index/main.go > firestore.indexes.json
 firebase deploy --only firestore:indexes
 gcloud app deploy web
