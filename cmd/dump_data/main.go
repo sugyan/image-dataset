@@ -97,21 +97,33 @@ func query(ctx context.Context) (<-chan string, error) {
 				log.Fatalf("invalid status: %s", status)
 			}
 		}
-		iter := query.Limit(num).Documents(ctx)
-		for i := 0; i < num; i++ {
-			document, err := iter.Next()
-			if err != nil {
-				if errors.Is(err, iterator.Done) {
-					break
-				} else {
+		i := 0
+	Loop:
+		for {
+			log.Printf("%d", i)
+			iter := query.Limit(500).Documents(ctx)
+			for {
+				document, err := iter.Next()
+				if err != nil {
+					if errors.Is(err, iterator.Done) {
+						break
+					} else {
+						log.Fatal(err)
+					}
+				}
+				query = query.StartAfter(document)
+
+				var image entity.Image
+				if err := document.DataTo(&image); err != nil {
 					log.Fatal(err)
 				}
+				urlCh <- image.ImageURL
+				i++
+				if i == num {
+					break Loop
+				}
 			}
-			var image entity.Image
-			if err := document.DataTo(&image); err != nil {
-				log.Fatal(err)
-			}
-			urlCh <- image.ImageURL
+
 		}
 		close(urlCh)
 	}()

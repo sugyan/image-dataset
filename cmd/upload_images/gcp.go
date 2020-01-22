@@ -58,6 +58,10 @@ func (g *gcp) upload(filepath string) error {
 	if err := json.NewDecoder(jsonFile).Decode(data); err != nil {
 		return err
 	}
+	// skip if image is too small
+	if data.Size < 256 {
+		return nil
+	}
 
 	// load image file
 	name := strings.TrimSuffix(path.Base(filepath), path.Ext(filepath))
