@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -30,36 +31,66 @@ func run(ctx context.Context, projectID string) error {
 		return err
 	}
 	query := gcp.fsClient.Collection(entity.KindNameImage).
-		Where("Size0256", "==", false).
+		Where("Size0512", "==", false).
 		OrderBy("ID", firestore.Asc)
-Loop:
+
 	for {
-		iter := query.Limit(200).Documents((ctx))
-		images := []*entity.Image{}
-		for {
-			document, err := iter.Next()
-			if err != nil {
-				if errors.Is(err, iterator.Done) {
-					break
-				} else {
+		if err := gcp.fsClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+			iter := query.Limit(200).Documents((ctx))
+			images := []*entity.Image{}
+			for {
+				document, err := iter.Next()
+				if err != nil {
+					if errors.Is(err, iterator.Done) {
+						break
+					} else {
+						return err
+					}
+				}
+				query = query.StartAfter(document)
+
+				var image entity.Image
+				if err := document.DataTo(&image); err != nil {
 					return err
 				}
+				images = append(images, &image)
 			}
-			query = query.StartAfter(document)
+			if len(images) == 0 {
+				return fmt.Errorf("Finised")
+			}
 
-			var image entity.Image
-			if err := document.DataTo(&image); err != nil {
+			counts := []map[entity.Status]int{{}, {}, {}}
+			for _, image := range images {
+				for i, size := range []int{256, 512, 1024} {
+					if image.Size >= size {
+						counts[i][image.Status]++
+					}
+				}
+			}
+			if err := gcp.delete(ctx, images); err != nil {
 				return err
 			}
-			images = append(images, &image)
-		}
-		if len(images) == 0 {
-			break Loop
-		}
-		if err := gcp.delete(ctx, images); err != nil {
+			log.Printf("deleted %d images", len(images))
+			for i, count := range counts {
+				if len(count) > 0 {
+					docID := []string{"0256", "0512", "1024"}[i]
+					ref := gcp.fsClient.Collection(entity.KindNameCount).Doc(docID)
+					updates := []firestore.Update{}
+					for k, v := range count {
+						updates = append(updates, firestore.Update{
+							Path:  k.Path(),
+							Value: firestore.Increment(-v),
+						})
+					}
+					if err := tx.Update(ref, updates); err != nil {
+						return err
+					}
+					log.Printf("updated counts for %s: %v", docID, count)
+				}
+			}
+			return nil
+		}); err != nil {
 			return err
 		}
-		log.Printf("deleted %d images", len(images))
 	}
-	return nil
 }
