@@ -191,6 +191,9 @@ const ImageViewer: React.FC = () => {
             if (reverse) {
                 params.set("reverse", "true");
             }
+            if (!params.has("sort")) {
+                params.set("sort", "id");
+            }
             const res = await fetch(`/api/images?${params.toString()}`);
             if (res.ok) {
                 const images: ImageResponse[] = await res.json();
