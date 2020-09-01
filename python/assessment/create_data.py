@@ -1,12 +1,12 @@
-import os
 import argparse
-
+import os
 import pandas as pd
 
 
 def run(images_dir, data_file):
     s_old = set()
     s_new = set()
+
     # retrieve or create dataframe
     df = pd.DataFrame([])
     if os.path.exists(data_file):
@@ -18,9 +18,10 @@ def run(images_dir, data_file):
             continue
         filepath = os.path.abspath(os.path.join(images_dir, filename))
         s_new.add(filepath)
-
+    # create new dataframe
     df = df.drop(s_old - s_new)
     df = df.append(pd.DataFrame(index=pd.Index(s_new - s_old)))
+    df = df.fillna({"phash": ""})
     print(df)
     df.to_hdf(data_file, key="images")
 
