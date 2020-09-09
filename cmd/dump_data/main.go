@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"cloud.google.com/go/firestore"
@@ -48,26 +50,59 @@ func main() {
 }
 
 func run() error {
+	// collect existing files
+	filenames := map[string]struct{}{}
+	files, err := ioutil.ReadDir(outdir)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".jpg") {
+			continue
+		}
+		filenames[file.Name()] = struct{}{}
+	}
+	// collect target urls
 	urlCh, err := query(context.Background())
 	if err != nil {
 		return err
 	}
-	errCh := make(chan error)
+	// download & resize & save to file (run with workers)
+	outCh, errCh := make(chan string), make(chan error)
 	wg := sync.WaitGroup{}
 	for _, w := range newWorkers(20) {
 		wg.Add(1)
 		go func(w *worker) {
 			defer wg.Done()
-			w.run(urlCh, errCh)
+			w.run(urlCh, outCh, errCh)
 		}(w)
 	}
 	go func() {
 		wg.Wait()
-		close(errCh)
+		close(outCh)
 	}()
-	for err := range errCh {
-		return err
+	// collect output paths and calculate diff
+Loop:
+	for {
+		select {
+		case err := <-errCh:
+			return err
+		case out, ok := <-outCh:
+			if !ok {
+				break Loop
+			}
+			filename := filepath.Base(out)
+			if _, exist := filenames[filename]; exist {
+				delete(filenames, filename)
+			}
+		}
 	}
+	// delete old files
+	for filename := range filenames {
+		os.Remove(filepath.Join(outdir, filename))
+		log.Printf("delete %s", filename)
+	}
+
 	return nil
 }
 
@@ -144,7 +179,7 @@ func newWorkers(numWorkers int) []*worker {
 	return workers
 }
 
-func (w *worker) run(urlCh <-chan string, errCh chan<- error) {
+func (w *worker) run(urlCh <-chan string, outCh chan<- string, errCh chan<- error) {
 	outdir, err := filepath.Abs(outdir)
 	if err != nil {
 		errCh <- err
@@ -152,30 +187,42 @@ func (w *worker) run(urlCh <-chan string, errCh chan<- error) {
 	}
 	kernel := draw.CatmullRom
 	for url := range urlCh {
-		log.Printf("[%02d] %s", w.index, url)
-		resp, err := http.Get(url)
+		outpath := filepath.Join(outdir, fmt.Sprintf("%s.jpg", path.Base(url)))
+		// check if file exists
+		_, err := os.Stat(outpath)
 		if err != nil {
-			errCh <- fmt.Errorf("[%s] failed to download: %s", url, err.Error())
-			continue
+			if !os.IsNotExist(err) {
+				errCh <- err
+				continue
+			}
+			resp, err := http.Get(url)
+			if err != nil {
+				errCh <- fmt.Errorf("[%s] failed to download: %s", url, err.Error())
+				continue
+			}
+			defer resp.Body.Close()
+			// Download and resize
+			img, err := jpeg.Decode(resp.Body)
+			if err != nil {
+				errCh <- fmt.Errorf("[%s] failed to decode: %s", url, err.Error())
+				continue
+			}
+			dst := image.NewRGBA(image.Rect(0, 0, size, size))
+			kernel.Scale(dst, image.Rect(0, 0, size, size), img, img.Bounds(), draw.Over, nil)
+			// Save to file
+			file, err := os.Create(filepath.Join(outdir, fmt.Sprintf("%s.jpg", path.Base(url))))
+			if err != nil {
+				errCh <- err
+				return
+			}
+			if err := jpeg.Encode(file, dst, &jpeg.Options{Quality: 100}); err != nil {
+				errCh <- err
+				return
+			}
+			log.Printf("[%02d] %s -> %s", w.index, url, path.Base(outpath))
+		} else {
+			log.Printf("%s already exists", path.Base(outpath))
 		}
-		defer resp.Body.Close()
-		// Download and resize
-		img, err := jpeg.Decode(resp.Body)
-		if err != nil {
-			errCh <- fmt.Errorf("[%s] failed to decode: %s", url, err.Error())
-			continue
-		}
-		dst := image.NewRGBA(image.Rect(0, 0, size, size))
-		kernel.Scale(dst, image.Rect(0, 0, size, size), img, img.Bounds(), draw.Over, nil)
-		// Save to file
-		file, err := os.Create(filepath.Join(outdir, fmt.Sprintf("%s.jpg", path.Base(url))))
-		if err != nil {
-			errCh <- err
-			return
-		}
-		if err := jpeg.Encode(file, dst, &jpeg.Options{Quality: 100}); err != nil {
-			errCh <- err
-			return
-		}
+		outCh <- outpath
 	}
 }
