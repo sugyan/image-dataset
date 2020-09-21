@@ -7,7 +7,9 @@ from PIL import Image
 def calc_brisque(df):
     for row in df[df["brisque"].isnull()].itertuples():
         image = Image.open(row.Index)
-        df.loc[row.Index, "brisque"] = brisque.score(image)
+        score = brisque.score(image)
+        print(row.Index, score)
+        df.loc[row.Index, "brisque"] = score
 
     return df
 

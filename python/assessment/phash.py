@@ -8,6 +8,7 @@ def calc_phash(df):
     for row in df[df["phash"] == ""].itertuples():
         image = Image.open(row.Index)
         phash = imagehash.phash(image)
+        print(row.Index, phash)
         df.loc[row.Index, "phash"] = str(phash)
 
     return df
