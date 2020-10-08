@@ -3,45 +3,38 @@ import dlib
 import pandas as pd
 
 
-def calc_face_detection(df, predictor_path):
-    parts_names = [f"parts_{i:02d}" for i in range(68)]
-    df_faces = pd.DataFrame(
-        index=df.index,
-        columns=pd.MultiIndex.from_product(
-            [["face"], ["score", "left", "top", "right", "bottom"]]
-        ),
-    )
-    df_parts = pd.DataFrame(
-        index=df.index,
-        columns=pd.MultiIndex.from_product(
-            [parts_names, ["x", "y"]]
-        ),
-    )
+def detect_single_face(detector, image):
+    for adjust_threshold in [x / 20.0 for x in range(0, -10, -1)]:
+        for upsample_num_times in range(0, 3):
+            detections, scores, indices = detector.run(
+                image, upsample_num_times, adjust_threshold
+            )
+            if len(detections) == 1:
+                return detections, scores, indices
+    return None, None, None
 
+
+def calc_face_detection(df, predictor_path):
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predictor_path)
-    for row in df.itertuples():
-        image = dlib.load_rgb_image(row.Index)
-        detections, scores, indices = detector.run(image, 0, 0.0)
-        if len(detections) != 1:
-            continue
 
-        shape = predictor(image, detections[0])
-        print(row.Index, detections, scores, shape.num_parts)
+    for row in df[df["face_score"].isnull()].itertuples():
+        print(row.Index)
+        image = dlib.load_rgb_image(row.Index)
+        detections, scores, indices = detect_single_face(detector, image)
+        if detections is None:
+            print("failed to detect the face")
+            continue
         rect = detections[0]
-        df_faces.at[row.Index] = (
-            scores[0],
-            rect.left(),
-            rect.top(),
-            rect.right(),
-            rect.bottom(),
-        )
+        df.loc[row.Index, "face_score"] = scores[0]
+        df.loc[row.Index, "face_left"] = rect.left()
+        df.loc[row.Index, "face_top"] = rect.top()
+        df.loc[row.Index, "face_right"] = rect.right()
+        df.loc[row.Index, "face_bottom"] = rect.bottom()
+        shape = predictor(image, rect)
         for i in range(shape.num_parts):
-            df_parts.loc[row.Index][parts_names[i]] = (
-                shape.part(i).x,
-                shape.part(i).y,
-            )
-    df = pd.concat([df, df_faces, df_parts], axis=1)
+            df.loc[row.Index, f"parts{i:02d}_x"] = shape.part(i).x
+            df.loc[row.Index, f"parts{i:02d}_y"] = shape.part(i).y
     return df
 
 
