@@ -4,6 +4,22 @@ import pandas as pd
 
 
 def run(df, threshold):
+    df.loc[:, "eyel_x"] = (
+        df.loc[:, [f"parts{i:02d}_x" for i in range(36, 42)]].sum(axis=1) / 6
+    )
+    df.loc[:, "eyel_y"] = (
+        df.loc[:, [f"parts{i:02d}_y" for i in range(36, 42)]].sum(axis=1) / 6
+    )
+    df.loc[:, "eyer_x"] = (
+        df.loc[:, [f"parts{i:02d}_x" for i in range(42, 48)]].sum(axis=1) / 6
+    )
+    df.loc[:, "eyer_y"] = (
+        df.loc[:, [f"parts{i:02d}_y" for i in range(42, 48)]].sum(axis=1) / 6
+    )
+    df.loc[:, "angle"] = np.degrees(
+        np.arctan2(df["eyer_y"] - df["eyel_y"], df["eyer_x"] - df["eyel_x"])
+    )
+
     parts_x = [f"parts{i:02d}_x" for i in range(0, 68)]
     parts_y = [f"parts{i:02d}_y" for i in range(0, 68)]
     df.loc[:, "face_w"] = df.loc[:, "face_right"] - df.loc[:, "face_left"]
@@ -17,6 +33,7 @@ def run(df, threshold):
 
     ids = set()
     targets = (
+        "angle",
         "face_w",
         "face_h",
         "xmin",
