@@ -16,8 +16,8 @@ def run(df, threshold):
     df.loc[:, "eyer_y"] = (
         df.loc[:, [f"parts{i:02d}_y" for i in range(42, 48)]].sum(axis=1) / 6
     )
-    df.loc[:, "angle"] = np.degrees(
-        np.arctan2(df["eyer_y"] - df["eyel_y"], df["eyer_x"] - df["eyel_x"])
+    df.loc[:, "angle"] = np.arctan2(
+        df["eyer_y"] - df["eyel_y"], df["eyer_x"] - df["eyel_x"]
     )
 
     parts_x = [f"parts{i:02d}_x" for i in range(0, 68)]
